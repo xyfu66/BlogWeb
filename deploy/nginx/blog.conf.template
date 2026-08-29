@@ -1,35 +1,33 @@
-# ==============================================================================
+﻿# ==============================================================================
 # BlogWeb Nginx Location 配置模板
 # 架构定位：宿主机多项目共存体系下的子路径 SPA（挂载在 /me/blog/）
-# 变量来源：deploy/nginx/sites.env (由 install-nginx-sites.sh 或主站模板渲染)
+# 变量来源：deploy/nginx/sites.env (由 CorpWeb install-nginx-sites.sh 统一渲染)
 # ==============================================================================
 
 # 1. 自动补全末尾斜杠（访问 /me/blog 时重定向至 /me/blog/，避免被根路径 location / 拦截）
 location = /me/blog {
-    return 301 /me/blog/$is_args$args;
+    return 301 /me/blog/;
 }
 
-# 2. 静态资产长效缓存（Vite 构建 hash 资产，30 天不可变缓存）
-location ~* /me/blog/assets/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
-    root ${REMOTE_BLOG_WEB_ROOT};
-    expires 30d;
-    add_header Cache-Control "public, no-transform, immutable";
-    access_log off;
-}
-
-# 3. SPA 入口 index.html 防缓存（显式补齐安全响应头，修复 Nginx add_header 继承断层）
-location = /me/blog/index.html {
-    root ${REMOTE_BLOG_WEB_ROOT};
-    add_header Cache-Control "no-cache, no-store, must-revalidate";
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    expires 0;
-}
-
-# 4. 个人博客 SPA 路由分发（dist 部署于 /var/www/me/blog；root 取父根 /var/www）
+# 2. 个人博客 SPA 路由分发（dist 部署于 ；root 取父根 ）
 location /me/blog/ {
-    root ${REMOTE_BLOG_WEB_ROOT};
-    try_files $uri $uri/ /me/blog/index.html;
+    root ;
+    try_files  / /me/blog/index.html;
+
+    # 静态资产长效缓存 (Vite 打包自带 hash)
+    location ~* /me/blog/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
+        expires 30d;
+        add_header Cache-Control public, no-transform, immutable;
+        access_log off;
+    }
+
+    # 核心入口页面无缓存 + 显式补齐安全响应头
+    location = /me/blog/index.html {
+        add_header Cache-Control no-cache, no-store, must-revalidate;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-XSS-Protection 1; mode=block always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
+        expires 0;
+    }
 }
