@@ -28,8 +28,8 @@ function toggleMobileMenu() {
           </svg>
         </div>
         <div class="logo-text">
-          <span class="logo-name">BlogWeb</span>
-          <span class="logo-badge">Tech</span>
+          <span class="logo-name">博客</span>
+          <span class="logo-badge">比特漩涡</span>
         </div>
       </router-link>
 
@@ -107,6 +107,7 @@ function toggleMobileMenu() {
   justify-content: space-between;
   height: 100%;
   gap: 1.5rem;
+  flex-wrap: nowrap;
 }
 
 .brand-logo {
@@ -117,10 +118,8 @@ function toggleMobileMenu() {
   font-size: 1.15rem;
   color: var(--bl-text-highlight);
   transition: transform var(--bl-dur-fast) var(--bl-ease);
-}
-
-.brand-logo:hover {
-  transform: scale(1.02);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .logo-icon {
@@ -133,44 +132,68 @@ function toggleMobileMenu() {
   border: 1px solid rgba(88, 166, 255, 0.3);
   border-radius: var(--bl-radius-md);
   color: var(--bl-accent);
+  flex-shrink: 0;
 }
 
 .logo-text {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .logo-badge {
-  font-size: 0.65rem;
-  padding: 0.1rem 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 0.725rem;
+  line-height: normal;
   background: var(--bl-accent-soft);
   color: var(--bl-accent);
   border-radius: var(--bl-radius-full);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+.header-search {
+  width: 240px;
+  max-width: 240px;
+  flex-shrink: 0;
 }
 
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .nav-link {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--bl-text-secondary);
   padding: 0.4rem 0.8rem;
   border-radius: var(--bl-radius-sm);
   transition: all var(--bl-dur-fast) var(--bl-ease);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.5;
 }
 
 .nav-link:hover {
