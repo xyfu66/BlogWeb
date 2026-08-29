@@ -1,20 +1,38 @@
 <script setup lang="ts">
 const techSkills = [
   {
-    category: '前端工程与体系',
-    items: ['Vue 3 / React / TypeScript', 'Vite / Webpack / Rollup', 'Element Plus / TailwindCSS', 'Web Audio API / Canvas / WebGL'],
+    category: '开发语言',
+    items: [
+      'C# / .NET',
+      'Java (Spring / Java EE)',
+      'SQL (数据建模与性能调优)',
+      'JavaScript / TypeScript / HTML5 / CSS3',
+      'Python / C / C++ / Shell / VB.NET',
+    ],
   },
   {
-    category: '服务端与分布式',
-    items: ['FastAPI / Python / JavaSpring', 'PostgreSQL / Redis / MybatisPlus', 'Arq / 异步任务队列', 'Docker / Nginx / 反向代理'],
+    category: '数据库与存储',
+    items: [
+      'PostgreSQL / SQL Server',
+      'Oracle / MySQL / SQLite',
+      'AWS / Hadoop / 阿里云',
+    ],
   },
   {
-    category: '音频算法工程',
-    items: ['FluidSynth / SoundFont 音色库', 'MusicXML / MIDI 乐谱编解码', 'Oboe / ONNX Runtime', '实时音频流处理与混音'],
+    category: '前端与跨端开发',
+    items: [
+      'Vue.js (Vue 2 / Vue 3) / Element Plus',
+      'Android 原生移动端开发',
+      '现代 Web 交互与响应式界面设计',
+    ],
   },
   {
-    category: 'DevOps 与交付',
-    items: ['PowerShell 自动化部署流水线', 'Nginx 零停机原子静态切换 (Swap)', 'Let’s Encrypt 证书自动化', '系统监控与健康检查机制'],
+    category: '系统与业务领域',
+    items: [
+      'Windows / Linux 操作系统与环境配置',
+      '金融、保险、物流等行业核心业务系统经验',
+      'Nginx / 自动化脚本与基础部署',
+    ],
   },
 ]
 </script>
@@ -49,10 +67,10 @@ const techSkills = [
             欢迎来到我的个人技术博客。我是一名深耕于现代 Web 全栈技术、分布式架构与音频算法工程的工程师。
           </p>
           <p>
-            目前主要负责 <strong>BitVortex</strong> 及 <strong>节拍律动</strong> 核心系统的架构设计与工程落地。[节拍律动]是一款基于尖端音频算法与乐谱编排引擎的专业音乐制作平台，支持大规模多音轨编排、智能打分与实时伴奏合成。
+            目前主要负责 <strong>BitVortex</strong> 核心系统的架构设计与工程落地。
           </p>
           <p>
-            在这里，我将持续分享关于前端性能极致优化、大规模系统高可用设计、现代微服务交付流水线以及音频信号处理等领域的实践总结与架构思考。
+            在这里，我将持续分享关于AI智能体落地、前端性能极致优化、大规模系统高可用设计、现代微服务交付流水线以及音频信号处理等领域的实践总结与架构思考。
           </p>
         </div>
       </section>
