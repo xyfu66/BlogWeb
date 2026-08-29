@@ -4,7 +4,12 @@
 # 变量来源：deploy/nginx/sites.env (由 install-nginx-sites.sh 或主站模板渲染)
 # ==============================================================================
 
-# 1. 静态资产长效缓存（Vite 构建 hash 资产，30 天不可变缓存）
+# 1. 自动补全末尾斜杠（访问 /me/blog 时重定向至 /me/blog/，避免被根路径 location / 拦截）
+location = /me/blog {
+    return 301 /me/blog/$is_args$args;
+}
+
+# 2. 静态资产长效缓存（Vite 构建 hash 资产，30 天不可变缓存）
 location ~* /me/blog/assets/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
     root ${REMOTE_BLOG_WEB_ROOT};
     expires 30d;
@@ -12,7 +17,7 @@ location ~* /me/blog/assets/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
     access_log off;
 }
 
-# 2. SPA 入口 index.html 防缓存（显式补齐安全响应头，修复 Nginx add_header 继承断层）
+# 3. SPA 入口 index.html 防缓存（显式补齐安全响应头，修复 Nginx add_header 继承断层）
 location = /me/blog/index.html {
     root ${REMOTE_BLOG_WEB_ROOT};
     add_header Cache-Control "no-cache, no-store, must-revalidate";
@@ -23,7 +28,7 @@ location = /me/blog/index.html {
     expires 0;
 }
 
-# 3. 个人博客 SPA 路由分发（dist 部署于 /var/www/me/blog；root 取父根 /var/www）
+# 4. 个人博客 SPA 路由分发（dist 部署于 /var/www/me/blog；root 取父根 /var/www）
 location /me/blog/ {
     root ${REMOTE_BLOG_WEB_ROOT};
     try_files $uri $uri/ /me/blog/index.html;
