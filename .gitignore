@@ -1,33 +1,28 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# ==============================================================================
+# 全局基础设施与宿主环境过滤规则 (Global & Infrastructure Concerns)
+# ==============================================================================
 
-# Node modules
-node_modules
-dist
-dist-ssr
-*.local
+# 操作系统临时与索引文件 (OS System Artifacts)
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-# Editor directories and files
+# 通用 IDE 与编辑器工作空间配置 (IDE & Editor Settings)
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
+*.sw?
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
 
-# Environment configs with secrets
-deploy/.env
-.env
-.env.*.local
+# 诊断与系统临时目录
+.cursor/
+.kiro/
+.codegraph/
 
-# Build artifacts
-*.tsbuildinfo
+# 根目录私有日志与临时文件
+*.local
+logs/
+*.log
