@@ -139,7 +139,7 @@ sudo chmod -R 755 /var/www/me
     # 个人博客系统 (/me/blog/) - 宿主机子路径 SPA 挂载
     # ==============================================================================
 
-    # 1. 自动补全末尾斜杠（访问 /me/blog 时 301 重定向至 /me/blog/，避免被根路径 location / 拦截）
+    # 1. 重定向至 /me/blog/，避免被根路径 location / 拦截
     location = /me/blog {
         return 301 /me/blog/$is_args$args;
     }
