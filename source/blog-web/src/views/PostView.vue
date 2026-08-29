@@ -5,6 +5,7 @@ import { useBlogStore } from '@/stores/blog'
 import { renderMarkdownToSafeHtml, extractToc, type TocItem } from '@/utils/markdown'
 import TagBadge from '@/components/TagBadge.vue'
 import { usePostNavigation } from '@/composables/usePostNavigation'
+import { useMarkdownZoom } from '@/composables/useMarkdownZoom'
 import mermaid from 'mermaid'
 
 mermaid.initialize({
@@ -52,7 +53,9 @@ const props = defineProps<{
 const router = useRouter()
 const blogStore = useBlogStore()
 const { navigateToPost } = usePostNavigation()
+const { refresh: refreshZoomEnhancements, handleContainerClick } = useMarkdownZoom()
 
+const articleRef = ref<HTMLElement | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const rawMarkdown = ref('')
@@ -149,6 +152,7 @@ async function fetchContent() {
     loading.value = false
     await nextTick()
     await renderMermaidDiagrams()
+    await refreshZoomEnhancements(articleRef)
   }
 }
 
@@ -158,6 +162,7 @@ watch(
     if (html && !isLoading) {
       await nextTick()
       await renderMermaidDiagrams()
+      await refreshZoomEnhancements(articleRef)
     }
   },
 )
@@ -218,7 +223,7 @@ onMounted(() => {
 
       <!-- Main Post Content Layout -->
       <div v-else-if="post" class="post-layout">
-        <article class="post-article bl-card">
+        <article ref="articleRef" class="post-article bl-card" @click="handleContainerClick">
           <!-- Article Header -->
           <header class="article-header">
             <div class="header-meta">
