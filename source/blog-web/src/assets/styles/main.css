@@ -1,0 +1,179 @@
+@import './variables.css';
+@import './markdown.css';
+
+/* Base Resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bl-bg);
+  color: var(--bl-text);
+  font-family: var(--bl-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bl-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bl-bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bl-text-muted);
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Button & Inputs Reset */
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+/* Container */
+.bl-container {
+  width: 100%;
+  max-width: var(--bl-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.bl-content-container {
+  width: 100%;
+  max-width: var(--bl-content-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Glass Surface Card */
+.bl-card {
+  background: var(--bl-surface);
+  border: 1px solid var(--bl-border);
+  border-radius: var(--bl-radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all var(--bl-dur-normal) var(--bl-ease);
+}
+
+.bl-card:hover {
+  border-color: var(--bl-border-hover);
+  box-shadow: var(--bl-shadow-glow);
+}
+
+/* Badge Styles */
+.bl-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: var(--bl-radius-full);
+  background: var(--bl-accent-soft);
+  color: var(--bl-accent);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  transition: all var(--bl-dur-fast) var(--bl-ease);
+  cursor: pointer;
+  user-select: none;
+}
+
+.bl-tag:hover {
+  background: rgba(88, 166, 255, 0.22);
+  border-color: var(--bl-accent);
+  transform: translateY(-1px);
+}
+
+.bl-tag.is-active {
+  background: var(--bl-accent);
+  color: #0d1117;
+  border-color: var(--bl-accent);
+  font-weight: 600;
+}
+
+/* Search Highlight */
+mark.bl-highlight {
+  background: rgba(234, 179, 8, 0.3);
+  color: #ffd60a;
+  padding: 0.1em 0.25em;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* Element Plus Customization Overrides */
+.el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-text-color: var(--bl-text-secondary);
+  --el-pagination-hover-color: var(--bl-accent);
+  --el-pagination-button-bg-color: var(--bl-bg-secondary);
+  --el-pagination-button-color: var(--bl-text);
+  --el-pagination-button-disabled-bg-color: transparent;
+  --el-pagination-button-disabled-color: var(--bl-text-muted);
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.el-pagination.is-background .el-pager li:not(.is-disabled).is-active {
+  background-color: var(--bl-accent) !important;
+  color: #0d1117 !important;
+  font-weight: 600;
+}
+
+.el-pagination.is-background .el-pager li {
+  background-color: var(--bl-bg-secondary);
+  color: var(--bl-text-secondary);
+  border: 1px solid var(--bl-border);
+  border-radius: var(--bl-radius-sm);
+  transition: all var(--bl-dur-fast) var(--bl-ease);
+}
+
+.el-pagination.is-background .el-pager li:hover {
+  color: var(--bl-accent);
+  border-color: var(--bl-accent);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--bl-dur-slow) var(--bl-ease) forwards;
+}
