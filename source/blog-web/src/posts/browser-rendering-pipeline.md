@@ -28,57 +28,67 @@ summary: "以现代 Chromium RenderingNG 与 WebKit 架构为基准，系统性�
 
 其中，**Blink + V8** 构成了 Chromium 生态的核心，也是当今工业界绝大多数桌面端与移动端性能标准（如 Core Web Vitals）的参考基准。
 
-### 1.2 现代多进程架构隔离
+### 1.2 现代多进程协作架构
 
 现代浏览器采用面向服务的隔离架构，主要由以下核心进程协作完成：
 
-```
-+-----------------------------------------------------------------------+
-|                           Browser Process                             |
-|          (UI 交互、地址栏、书签、网络调度、权限控制、存储生命周期)         |
-+-------------------+-------------------------------+-------------------+
-                    | IPC                           | IPC
-+-------------------v-------------------+   +-------v-------------------+
-|            Renderer Process           |   |        GPU / Viz Process  |
-| (Sandbox 沙箱环境，每个 Tab/Site 独立)    |   | (汇总合成帧 Compositor Frame, |
-| - Main Thread: JS, DOM, Style, Layout |   |  调用 GPU 驱动向屏幕输出像素)  |
-| - Compositor Thread: 滚动, 合成, 动画 |   +---------------------------+
-| - Raster Threads: 多线程分块光栅化      |
-+---------------------------------------+
+```mermaid
+flowchart TD
+    subgraph BrowserProcess["Browser 主进程 (UI 交互 / 网络调度 / 权限控制 / 存储)"]
+        UI["浏览器 UI 界面"]
+        Network["网络协议栈调度 (Network Service)"]
+        Storage["存储与 Cookie 生命周期"]
+    end
+
+    subgraph RendererProcess["Renderer 渲染进程 (Sandbox 沙箱 / 每个 Tab 独立)"]
+        direction TB
+        MainThread["🧵 Main Thread (主线程: JS, DOM, Style, Layout, Paint)"]
+        CompThread["🧵 Compositor Thread (合成器线程: 滚动, 动画, 分块)"]
+        RasterThreads["🧵 Raster Threads (光栅化工作线程池)"]
+    end
+
+    subgraph VizProcess["GPU / Viz 合成进程 (硬件直出)"]
+        VizEngine["Viz 帧汇总器 (Frame Sink)"]
+        GPUHardware["GPU 显存与硬件光栅化驱动"]
+    end
+
+    BrowserProcess -->|IPC 进程间通信| RendererProcess
+    RendererProcess -->|IPC 提交 Compositor Frame| VizProcess
+    VizProcess --> Screen(["🖥️ 物理显示器 (V-Sync 60/120Hz)"])
+
+    classDef proc fill:#161b22,stroke:#58a6ff,stroke-width:2px,color:#f0f6fc;
+    classDef inner fill:#1f2937,stroke:#bc8cff,stroke-width:1px,color:#f0f6fc;
+    classDef output fill:#0d1117,stroke:#3fb950,stroke-width:2px,color:#f0f6fc;
+    class BrowserProcess,RendererProcess,VizProcess proc;
+    class UI,Network,Storage,MainThread,CompThread,RasterThreads,VizEngine,GPUHardware inner;
+    class Screen output;
 ```
 
 ---
 
 ## 2. 现代渲染流水线（The Modern Rendering Pipeline）
 
- Chromium RenderingNG 将渲染过程划分为严格、单向且高度模块化的阶段：
+Chromium RenderingNG 将渲染过程划分为严格、单向且高度模块化的流水线阶段：
 
-```
-Network Bytes
-     │
-     ▼
-[ 1. Parse & Tokenize ] ──────► DOM Tree & CSSOM
-     │
-     ▼
-[ 2. Style Recalculate ] ─────► ComputedStyle Tree
-     │
-     ▼
-[ 3. Layout ] ────────────────► Fragment Tree (Box 几何尺寸与坐标)
-     │
-     ▼
-[ 4. Pre-Paint ] ─────────────► Property Trees (Transform, Clip, Effect, Scroll)
-     │
-     ▼
-[ 5. Paint ] ─────────────────► Display Lists (绘制指令记录，非像素)
-     │
-     ▼ (Commit 提交至合成器线程)
-[ 6. Composite & Tiling ] ────► Layer Tiles (图层切片)
-     │
-     ▼ (多线程/GPU Raster)
-[ 7. Rasterization ] ─────────► GPU Textures (显存像素纹理)
-     │
-     ▼
-[ 8. Draw / Viz Display ] ────► Screen (屏幕物理像素呈现)
+```mermaid
+flowchart TD
+    Bytes["🌐 Network Bytes (网络 HTML/CSS 字节流)"] --> Parse["1. Parse & Tokenize (DOM 树 & CSSOM)"]
+    Parse --> Style["2. Style Recalculate (ComputedStyle 计算样式)"]
+    Style --> Layout["3. Layout (Fragment Tree 几何排版与坐标)"]
+    Layout --> PrePaint["4. Pre-Paint (Property Trees 属性树: Transform/Clip/Scroll)"]
+    PrePaint --> Paint["5. Paint (Display Lists 绘制指令记录)"]
+    
+    Paint -->|Commit 提交数据| Composite["6. Composite & Tiling (合成器图层切片)"]
+    Composite --> Raster["7. Rasterization (GPU 多线程光栅化 / 显存纹理 Textures)"]
+    Raster --> Viz["8. Draw & Viz Display (汇总合成帧并向屏幕输出)"]
+    Viz --> Display(["🖥️ 屏幕物理像素呈现"])
+
+    classDef mainT fill:#161b22,stroke:#58a6ff,stroke-width:2px,color:#f0f6fc;
+    classDef compT fill:#1f2937,stroke:#bc8cff,stroke-width:2px,color:#f0f6fc;
+    classDef gpuT fill:#0d1117,stroke:#3fb950,stroke-width:2px,color:#f0f6fc;
+    class Bytes,Parse,Style,Layout,PrePaint,Paint mainT;
+    class Composite,Raster compT;
+    class Viz,Display gpuT;
 ```
 
 ---
@@ -111,10 +121,19 @@ Network Bytes
 
 在旧架构中，渲染层（RenderLayer）往往耦合了几何变形与裁剪关系。现代 RenderingNG 引入了独立的 **Property Trees（属性树）**：
 
-- **Transform Tree**：维护矩阵变换（3D/2D 平移、旋转、缩放）。
-- **Clip Tree**：维护视口遮罩与 `overflow: hidden` 裁剪区域。
-- **Effect Tree**：维护透明度（`opacity`）、滤镜（`filter`）、混合模式。
-- **Scroll Tree**：维护各滚动容器的偏移量与层级。
+```mermaid
+flowchart LR
+    DOMElement["DOM 元素 / 图层"] --> PropertyTrees["🌳 Property Trees (属性树)"]
+    PropertyTrees --> Transform["Transform Tree (3D/2D 矩阵变换)"]
+    PropertyTrees --> Clip["Clip Tree (视口与 overflow:hidden 遮罩)"]
+    PropertyTrees --> Effect["Effect Tree (opacity 透明度 / filter 滤镜)"]
+    PropertyTrees --> Scroll["Scroll Tree (各滚动容器偏移行程)"]
+
+    classDef base fill:#161b22,stroke:#58a6ff,stroke-width:2px,color:#f0f6fc;
+    classDef sub fill:#1f2937,stroke:#bc8cff,stroke-width:1.5px,color:#f0f6fc;
+    class DOMElement,PropertyTrees base;
+    class Transform,Clip,Effect,Scroll sub;
+```
 
 > **核心价值**：当属性（如平移或透明度）发生变动时，无需遍历或重新计算整个布局树，只需在属性树上更新矩阵，极大地解放了主线程。
 
@@ -147,19 +166,36 @@ Paint 阶段并不会直接向屏幕输出像素，而是**将 DOM 元素的视�
 
 了解了现代分层合成流水线，就能从本质上解释 CSS 性能的层级差异：
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│     Reflow      │ ─► │     Repaint     │ ─► │    Composite    │
-│ (重排 / 回流)   │    │  (重绘 / 重新绘制)│    │   (合成器合成)  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-  触发所有阶段:          跳过布局阶段:          仅在合成线程运行:
-  - 改变 width, height   - 改变 color, bg      - transform, opacity
-  - 改变 margin, top     - 改变 box-shadow     - 零主线程开销
-```
+```mermaid
+flowchart LR
+    subgraph ReflowBranch["🔴 重排 (Reflow / Layout)"]
+        direction TB
+        R1["修改 width, height, margin, top"] --> R2["重新计算几何布局 (Layout)"]
+        R2 --> R3["重新生成绘制指令 (Paint)"]
+        R3 --> R4["重新光栅化 (Raster)"]
+    end
 
-- **重排（Reflow / Layout）**：改变了几何尺寸（如 `width`、`top`、`margin`），必须重新计算布局树 -> 预绘制 -> 重新生成 Paint 指令 -> 重新光栅化。开销最为昂贵。
-- **重绘（Repaint / Paint）**：改变了纯视觉属性（如 `background-color`、`color`），无需修改几何尺寸，跳过 Layout，但仍需重新生成 Paint 指令与光栅化。
-- **合成（Composite-only）**：使用 `transform` 或 `opacity` 时，浏览器仅在**合成器线程**中更新 Property Tree 矩阵。**完全跳过主线程的 Layout 与 Paint**，直接在 GPU 中完成纹理的矩阵变换与合成，即便主线程正在执行繁重的 JavaScript 任务，动画依然能够流畅丝滑。
+    subgraph RepaintBranch["🟡 重绘 (Repaint / Paint)"]
+        direction TB
+        P1["修改 color, background-color, box-shadow"] --> P2["跳过 Layout 阶段"]
+        P2 --> P3["重新生成绘制指令 (Paint)"]
+        P3 --> P4["重新光栅化 (Raster)"]
+    end
+
+    subgraph CompositeBranch["🟢 硬件合成 (Composite-only)"]
+        direction TB
+        C1["修改 transform, opacity"] --> C2["完全跳过主线程 Layout 与 Paint"]
+        C2 --> C3["仅在合成器线程更新 Property Trees 矩阵"]
+        C3 --> C4["⚡ GPU 直接执行纹理矩阵变换 (零主线程负担)"]
+    end
+
+    classDef cRed fill:#161b22,stroke:#f85149,stroke-width:2px,color:#f0f6fc;
+    classDef cYellow fill:#161b22,stroke:#d29922,stroke-width:2px,color:#f0f6fc;
+    classDef cGreen fill:#161b22,stroke:#3fb950,stroke-width:2px,color:#f0f6fc;
+    class R1,R2,R3,R4 cRed;
+    class P1,P2,P3,P4 cYellow;
+    class C1,C2,C3,C4 cGreen;
+```
 
 ---
 
@@ -167,12 +203,39 @@ Paint 阶段并不会直接向屏幕输出像素，而是**将 DOM 元素的视�
 
 ### 4.1 脚本加载与执行行为矩阵
 
-```
-HTML Parse:     [=======Parse HTML=======]          [===Parse===]
-<script>:       ───[Download]──[Execute JS]────────►
-<script defer>: ───[Download Parallel]────────────────────────[Execute JS]
-<script async>: ───[Download Parallel]──[Execute JS]────────►
-type="module":  ───[Download Parallel + Deps]─────────────────[Execute JS]
+```mermaid
+flowchart TD
+    subgraph S1["1. 经典普通 script 标签 (阻塞式)"]
+        direction LR
+        P1_1["HTML 解析"] --> D1["下载 JS (阻塞 DOM 解析)"] --> E1["执行 JS (阻塞 DOM 解析)"] --> P1_2["恢复 HTML 解析"]
+    end
+
+    subgraph S2["2. script defer 标签 (并行下载，延迟按序执行)"]
+        direction LR
+        P2_1["HTML 流式解析 (全程不中断)"]
+        D2["后台并行下载 JS 依赖"] -.-> E2["HTML 解析完毕后、DOMContentLoaded 前按序执行"]
+    end
+
+    subgraph S3["3. script async 标签 (异步下载，下载完立即抢占执行)"]
+        direction LR
+        P3_1["HTML 解析"]
+        D3["后台异步下载 JS"] --> E3["下载完成后立即暂停 HTML 并执行 JS"] --> P3_2["恢复 HTML 解析"]
+    end
+
+    subgraph S4["4. script type=module (现代 ES 模块体系)"]
+        direction LR
+        P4_1["HTML 流式解析 (全程不中断)"]
+        D4["并行解析依赖拓扑并下载模块"] -.-> E4["等同 defer 行为: DOM 就绪后按依赖拓扑顺序执行"]
+    end
+
+    classDef bSync fill:#161b22,stroke:#f85149,stroke-width:1.5px,color:#f0f6fc;
+    classDef bDefer fill:#161b22,stroke:#3fb950,stroke-width:1.5px,color:#f0f6fc;
+    classDef bAsync fill:#161b22,stroke:#d29922,stroke-width:1.5px,color:#f0f6fc;
+    classDef bModule fill:#161b22,stroke:#58a6ff,stroke-width:1.5px,color:#f0f6fc;
+    class S1 bSync;
+    class S2 bDefer;
+    class S3 bAsync;
+    class S4 bModule;
 ```
 
 | 方式 | 下载阶段 | 执行时机 | 执行顺序 | 是否阻塞 DOM 解析 |

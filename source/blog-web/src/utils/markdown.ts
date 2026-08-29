@@ -6,8 +6,33 @@ marked.setOptions({
   breaks: false,
 })
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+marked.use({
+  renderer: {
+    code(token: any) {
+      const text = typeof token === 'string' ? token : token.text || ''
+      const lang = typeof token === 'object' ? token.lang : ''
+
+      if (lang === 'mermaid') {
+        // 输出供 mermaid.js 客户端渲染的专用容器，进行实体转义防止 HTML 解析器破坏图表语法
+        return `<div class="mermaid-diagram"><pre class="mermaid">${escapeHtml(text)}</pre></div>`
+      }
+      return false
+    },
+  },
+})
+
 const CONTENT_HTML_PURIFY: DomPurifyConfig = {
   ALLOWED_TAGS: [
+    'div',
     'p',
     'h1',
     'h2',
@@ -38,9 +63,73 @@ const CONTENT_HTML_PURIFY: DomPurifyConfig = {
     'img',
     'mark',
     'del',
+    'svg',
+    'g',
+    'path',
+    'rect',
+    'circle',
+    'line',
+    'polyline',
+    'polygon',
+    'text',
+    'tspan',
+    'defs',
+    'marker',
+    'style',
+    'foreignObject',
+    'desc',
+    'title',
+    'clipPath',
+    'linearGradient',
+    'radialGradient',
+    'stop',
+    'use',
   ],
-  ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'src', 'alt', 'class'],
-  ALLOW_DATA_ATTR: false,
+  ALLOWED_ATTR: [
+    'href',
+    'title',
+    'target',
+    'rel',
+    'src',
+    'alt',
+    'class',
+    'id',
+    'style',
+    'viewBox',
+    'xmlns',
+    'd',
+    'fill',
+    'stroke',
+    'stroke-width',
+    'stroke-dasharray',
+    'stroke-linecap',
+    'stroke-linejoin',
+    'transform',
+    'points',
+    'marker-end',
+    'marker-start',
+    'text-anchor',
+    'dominant-baseline',
+    'font-size',
+    'font-family',
+    'font-weight',
+    'width',
+    'height',
+    'x',
+    'y',
+    'x1',
+    'y1',
+    'x2',
+    'y2',
+    'cx',
+    'cy',
+    'r',
+    'rx',
+    'ry',
+    'opacity',
+    'data-id',
+  ],
+  ALLOW_DATA_ATTR: true,
   RETURN_TRUSTED_TYPE: false,
 }
 

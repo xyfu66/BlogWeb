@@ -1,10 +1,49 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBlogStore } from '@/stores/blog'
 import { renderMarkdownToSafeHtml, extractToc, type TocItem } from '@/utils/markdown'
 import TagBadge from '@/components/TagBadge.vue'
 import { usePostNavigation } from '@/composables/usePostNavigation'
+import mermaid from 'mermaid'
+
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  securityLevel: 'loose',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  themeVariables: {
+    darkMode: true,
+    background: '#0d1117',
+    mainBkg: '#161b22',
+    nodeBorder: '#58a6ff',
+    nodeTextColor: '#f0f6fc',
+    lineColor: '#58a6ff',
+    textColor: '#f0f6fc',
+    primaryColor: '#1f2937',
+    primaryBorderColor: '#58a6ff',
+    primaryTextColor: '#f0f6fc',
+    secondaryColor: '#161b22',
+    secondaryBorderColor: '#bc8cff',
+    secondaryTextColor: '#f0f6fc',
+    tertiaryColor: '#0b0e14',
+    tertiaryBorderColor: '#3fb950',
+    tertiaryTextColor: '#f0f6fc',
+    noteBkgColor: '#161b22',
+    noteTextColor: '#f0f6fc',
+    noteBorderColor: '#bc8cff',
+    actorBkg: '#161b22',
+    actorBorder: '#58a6ff',
+    actorTextColor: '#f0f6fc',
+    actorLineColor: '#58a6ff',
+    signalColor: '#f0f6fc',
+    signalTextColor: '#f0f6fc',
+    labelBoxBkgColor: '#161b22',
+    labelBoxBorderColor: '#58a6ff',
+    labelTextColor: '#f0f6fc',
+    loopTextColor: '#bc8cff',
+  },
+})
 
 const props = defineProps<{
   slug: string
@@ -55,6 +94,42 @@ const nextPost = computed(() => {
   return null
 })
 
+async function renderMermaidDiagrams() {
+  await nextTick()
+  // 确保 DOM 已经完全挂载在文档树中
+  const containers = document.querySelectorAll<HTMLElement>('.post-article .mermaid-diagram')
+  if (!containers || containers.length === 0) return
+
+  for (let i = 0; i < containers.length; i++) {
+    const container = containers[i]
+    if (container.querySelector('svg')) continue
+
+    const pre = container.querySelector('pre.mermaid')
+    const code = (pre ? pre.textContent : container.textContent)?.trim() || ''
+    if (!code) continue
+
+    const id = `mermaid-svg-${Date.now()}-${i}-${Math.floor(Math.random() * 10000)}`
+    try {
+      const cleanCode = code
+        .replace(/&gt;/g, '>')
+        .replace(/&lt;/g, '<')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+
+      const { svg, bindFunctions } = await mermaid.render(id, cleanCode)
+      container.innerHTML = svg
+      bindFunctions?.(container)
+    } catch (err) {
+      console.warn(`Mermaid render failed for diagram #${i}:`, err)
+      if (pre) {
+        pre.setAttribute('data-processed', 'true')
+        pre.classList.add('mermaid-error')
+      }
+    }
+  }
+}
+
 async function fetchContent() {
   loading.value = true
   error.value = null
@@ -70,9 +145,22 @@ async function fetchContent() {
   } catch (err: any) {
     error.value = err.message || '文章加载失败'
   } finally {
+    // 必须在 loading 设为 false 后，Vue 才会将 .post-article 挂载到 DOM 中
     loading.value = false
+    await nextTick()
+    await renderMermaidDiagrams()
   }
 }
+
+watch(
+  () => [htmlContent.value, loading.value],
+  async ([html, isLoading]) => {
+    if (html && !isLoading) {
+      await nextTick()
+      await renderMermaidDiagrams()
+    }
+  },
+)
 
 watch(
   () => props.slug,
