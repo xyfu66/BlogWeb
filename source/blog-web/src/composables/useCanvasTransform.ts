@@ -28,6 +28,7 @@ export function useCanvasTransform(options: CanvasTransformOptions = {}) {
   })
 
   const isDragging = ref(false)
+  const enableTransition = ref(false)
   const activePointers = new Map<number, PointerInfo>()
   let initialPinchDistance = 0
   let initialPinchScale = 1.0
@@ -40,7 +41,9 @@ export function useCanvasTransform(options: CanvasTransformOptions = {}) {
       transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale}) rotate(${rotate}deg)`,
       transformOrigin: 'center center',
       willChange: 'transform',
-      transition: isDragging.value ? 'none' : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+      transition: enableTransition.value && !isDragging.value
+        ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+        : 'none',
     }
   })
 
@@ -51,41 +54,50 @@ export function useCanvasTransform(options: CanvasTransformOptions = {}) {
   }
 
   function zoomIn() {
+    enableTransition.value = true
     transform.value.scale = clampScale(transform.value.scale + scaleStep)
   }
 
   function zoomOut() {
+    enableTransition.value = true
     transform.value.scale = clampScale(transform.value.scale - scaleStep)
   }
 
   function setScale(targetScale: number) {
+    enableTransition.value = true
     transform.value.scale = clampScale(targetScale)
   }
 
   function rotateClockwise() {
+    enableTransition.value = true
     transform.value.rotate = (transform.value.rotate + 90) % 360
   }
 
-  function reset() {
+  function reset(newScale?: number) {
     if (rafId) {
       cancelAnimationFrame(rafId)
       rafId = null
     }
+    enableTransition.value = false
     transform.value = {
-      scale: initialScale,
+      scale: newScale !== undefined ? clampScale(newScale) : initialScale,
       translateX: 0,
       translateY: 0,
       rotate: 0,
     }
     isDragging.value = false
     activePointers.clear()
+    setTimeout(() => {
+      enableTransition.value = true
+    }, 50)
   }
 
-  function toggleActualSize() {
-    if (Math.abs(transform.value.scale - 1) < 0.05) {
-      transform.value.scale = 2.0
+  function toggleActualSize(fitScale = 1.0) {
+    enableTransition.value = true
+    if (Math.abs(transform.value.scale - fitScale) < 0.05) {
+      transform.value.scale = Math.abs(fitScale - 1.0) < 0.05 ? 1.8 : 1.0
     } else {
-      transform.value.scale = 1.0
+      transform.value.scale = fitScale
       transform.value.translateX = 0
       transform.value.translateY = 0
     }

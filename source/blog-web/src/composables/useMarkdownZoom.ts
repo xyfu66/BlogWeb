@@ -126,19 +126,19 @@ export function useMarkdownZoom() {
         }
 
         if (vbWidth > 0 && vbHeight > 0) {
-          // 显式指定固有尺寸属性与视口约束，防止在 flex 布局中尺寸坍缩为 0
           clonedSvg.setAttribute('width', String(vbWidth))
           clonedSvg.setAttribute('height', String(vbHeight))
-          clonedSvg.style.width = '100%'
-          clonedSvg.style.height = 'auto'
-          clonedSvg.style.maxWidth = `${vbWidth}px`
-          clonedSvg.style.maxHeight = `${vbHeight}px`
           clonedSvg.style.display = 'block'
+          clonedSvg.style.width = `${vbWidth}px`
+          clonedSvg.style.height = `${vbHeight}px`
+          clonedSvg.style.maxWidth = 'none'
+          clonedSvg.style.maxHeight = 'none'
+          clonedSvg.style.overflow = 'visible'
         }
 
         clonedSvg.style.backgroundColor = 'transparent'
 
-        openSvg(clonedSvg.outerHTML, title)
+        openSvg(clonedSvg.outerHTML, title, vbWidth, vbHeight)
         return
       }
     }

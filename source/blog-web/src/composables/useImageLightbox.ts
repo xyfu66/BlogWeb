@@ -23,11 +23,13 @@ export function useImageLightbox() {
     })
   }
 
-  function openSvg(svgContent: string, title?: string) {
+  function openSvg(svgContent: string, title?: string, naturalWidth?: number, naturalHeight?: number) {
     open({
       type: 'svg',
       svgContent,
       title: title || '架构流程图例',
+      naturalWidth,
+      naturalHeight,
     })
   }
 

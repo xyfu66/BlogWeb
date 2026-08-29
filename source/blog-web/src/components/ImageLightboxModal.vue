@@ -137,6 +137,31 @@ function lockBodyScroll() {
   document.body.style.overflow = 'hidden'
 }
 
+function computeInitialFitScale(): number {
+  const item = state.value.activeItem
+  if (!item) return 1.0
+
+  if (item.type === 'svg' && item.naturalWidth && item.naturalHeight) {
+    const screenW = window.innerWidth * 0.88
+    const screenH = window.innerHeight * 0.78
+    const cardPaddingW = 80 // 2.5rem * 2
+    const cardPaddingH = 80
+    const totalW = item.naturalWidth + cardPaddingW
+    const totalH = item.naturalHeight + cardPaddingH
+    const scale = Math.min(1.0, screenW / totalW, screenH / totalH)
+    return Math.max(0.2, Number(scale.toFixed(2)))
+  }
+  return 1.0
+}
+
+function handleResetClick() {
+  reset(computeInitialFitScale())
+}
+
+function handleToggleActualSizeClick() {
+  toggleActualSize(computeInitialFitScale())
+}
+
 function unlockBodyScroll() {
   document.body.style.overflow = ''
   document.body.style.paddingRight = originalPaddingRight
@@ -148,7 +173,8 @@ watch(
     if (isOpen) {
       lastActiveElement = document.activeElement as HTMLElement | null
       lockBodyScroll()
-      reset()
+      const fitScale = computeInitialFitScale()
+      reset(fitScale)
       window.addEventListener('keydown', handleKeyDown)
       nextTick(() => {
         canvasRef.value?.focus()
@@ -279,12 +305,12 @@ onUnmounted(() => {
               </svg>
             </button>
 
-            <!-- Zoom Percent Badge (Click to reset 100%) -->
+            <!-- Zoom Percent Badge (Click to reset) -->
             <button
               class="tool-btn scale-badge-btn"
-              title="点击重置为 100%"
+              title="点击重置缩放"
               aria-label="缩放百分比"
-              @click="reset"
+              @click="handleResetClick"
             >
               {{ zoomPercent }}%
             </button>
@@ -309,9 +335,9 @@ onUnmounted(() => {
             <!-- Actual Size / Fit Toggle -->
             <button
               class="tool-btn"
-              title="1:1 原尺寸 / 放大切换"
+              title="自适应屏幕 / 1:1 原尺寸切换"
               aria-label="切换原尺寸"
-              @click="toggleActualSize"
+              @click="handleToggleActualSizeClick"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 3 21 3 21 9"></polyline>
@@ -338,7 +364,7 @@ onUnmounted(() => {
               class="tool-btn"
               title="居中重置 (0)"
               aria-label="重置"
-              @click="reset"
+              @click="handleResetClick"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
@@ -488,37 +514,30 @@ onUnmounted(() => {
 }
 
 .lightbox-canvas-content {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  max-width: 92vw;
-  max-height: 82vh;
   pointer-events: auto;
+  user-select: none;
 }
 
 /* SVG rendering */
 .lightbox-svg-container {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(145deg, rgba(22, 27, 34, 0.98), rgba(13, 17, 23, 0.99));
-  padding: 2.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(88, 166, 255, 0.3);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(88, 166, 255, 0.15);
-  max-width: 88vw;
-  max-height: 78vh;
+  padding: 2.25rem 2.5rem;
+  border-radius: var(--bl-radius-lg, 14px);
+  border: 1px solid rgba(88, 166, 255, 0.35);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(88, 166, 255, 0.15);
+  width: fit-content;
+  height: fit-content;
   box-sizing: border-box;
-  overflow: visible;
 }
 
 .lightbox-svg-container :deep(svg) {
   display: block;
-  width: 100%;
-  height: auto;
-  min-width: 320px;
-  max-width: 82vw;
-  max-height: 70vh;
   margin: 0 auto;
   overflow: visible;
 }
@@ -537,12 +556,13 @@ onUnmounted(() => {
 
 /* Image rendering */
 .lightbox-image-target {
+  display: block;
   max-width: 85vw;
   max-height: 75vh;
   object-fit: contain;
   border-radius: 8px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Bottom Floating Toolbar */
@@ -615,42 +635,12 @@ onUnmounted(() => {
 /* Modal Transition */
 .bl-lightbox-fade-enter-active,
 .bl-lightbox-fade-leave-active {
-  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bl-lightbox-fade-enter-from,
 .bl-lightbox-fade-leave-to {
   opacity: 0;
-}
-
-.bl-lightbox-fade-enter-active .lightbox-canvas-content {
-  animation: lightboxScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.bl-lightbox-fade-leave-active .lightbox-canvas-content {
-  animation: lightboxScaleOut 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes lightboxScaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes lightboxScaleOut {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.92);
-  }
 }
 
 @media (max-width: 768px) {
