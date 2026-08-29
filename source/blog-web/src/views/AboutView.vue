@@ -6,11 +6,11 @@ const techSkills = [
   },
   {
     category: '服务端与分布式',
-    items: ['FastAPI / Python / Go', 'PostgreSQL / Redis / SQLAlchemy', 'Celery / Arq / 异步任务队列', 'Docker / Nginx / 反向代理'],
+    items: ['FastAPI / Python / JavaSpring', 'PostgreSQL / Redis / MybatisPlus', 'Arq / 异步任务队列', 'Docker / Nginx / 反向代理'],
   },
   {
-    category: '音频与算法工程',
-    items: ['FluidSynth / SoundFont 音色库', 'MusicXML / MIDI 乐谱编解码', 'CTranslate2 / ONNX Runtime', '实时音频流处理与混音'],
+    category: '音频算法工程',
+    items: ['FluidSynth / SoundFont 音色库', 'MusicXML / MIDI 乐谱编解码', 'Oboe / ONNX Runtime', '实时音频流处理与混音'],
   },
   {
     category: 'DevOps 与交付',
