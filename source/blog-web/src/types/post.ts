@@ -1,3 +1,10 @@
+export interface PostSeriesInfo {
+  name: string
+  slug: string
+  part?: number
+  description?: string
+}
+
 export interface BlogPostMeta {
   slug: string
   title: string
@@ -6,6 +13,17 @@ export interface BlogPostMeta {
   summary: string
   readingTime: number
   link?: string
+  series?: PostSeriesInfo
+}
+
+export interface SeriesMeta {
+  slug: string
+  name: string
+  description?: string
+  postsCount: number
+  posts: BlogPostMeta[]
+  tags: string[]
+  updatedAt: string
 }
 
 export type PostNavigationTarget = Pick<BlogPostMeta, 'slug' | 'link'>
@@ -21,3 +39,4 @@ export interface SearchResultItem {
   highlightedSummary: string
   matchedTags: string[]
 }
+

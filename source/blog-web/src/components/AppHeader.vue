@@ -8,6 +8,7 @@ const isMobileMenuOpen = ref(false)
 
 const navLinks = [
   { name: '首页', path: '/' },
+  { name: '专栏合集', path: '/series' },
   { name: '关于我', path: '/about' },
 ]
 

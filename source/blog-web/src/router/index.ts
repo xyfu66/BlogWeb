@@ -8,6 +8,19 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '首页' },
   },
   {
+    path: '/series',
+    name: 'series-list',
+    component: () => import('@/views/SeriesListView.vue'),
+    meta: { title: '专栏合集' },
+  },
+  {
+    path: '/series/:slug',
+    name: 'series-detail',
+    component: () => import('@/views/SeriesDetailView.vue'),
+    props: true,
+    meta: { title: '专栏详情' },
+  },
+  {
     path: '/post/:slug',
     name: 'post-detail',
     component: () => import('@/views/PostView.vue'),
@@ -25,6 +38,7 @@ const routes: RouteRecordRaw[] = [
     path: '/search',
     name: 'search',
     component: () => import('@/views/SearchView.vue'),
+    props: true,
     meta: { title: '搜索结果' },
   },
   {

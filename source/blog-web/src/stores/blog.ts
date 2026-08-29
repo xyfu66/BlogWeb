@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { BlogPostMeta, TagCount } from '@/types/post'
+import type { BlogPostMeta, TagCount, SeriesMeta } from '@/types/post'
 import defaultPosts from 'virtual:blog-posts'
 
 // 动态载入所有 markdown 源码
@@ -35,8 +35,88 @@ export const useBlogStore = defineStore('blog', () => {
     return posts.value.filter((p) => p.tags && p.tags.includes(activeTag.value!))
   })
 
+  // 计算专栏 / 系列合集列表
+  const seriesList = computed<SeriesMeta[]>(() => {
+    const map = new Map<string, SeriesMeta>()
+
+    for (const post of posts.value) {
+      if (!post.series?.slug || !post.series?.name) continue
+
+      const slug = post.series.slug
+      if (!map.has(slug)) {
+        map.set(slug, {
+          slug,
+          name: post.series.name,
+          description: post.series.description || '',
+          postsCount: 0,
+          posts: [],
+          tags: [],
+          updatedAt: post.date,
+        })
+      }
+
+      const series = map.get(slug)!
+      series.posts.push(post)
+      if (post.series.description && !series.description) {
+        series.description = post.series.description
+      }
+      if (post.date > series.updatedAt) {
+        series.updatedAt = post.date
+      }
+      // 聚合标签
+      for (const t of post.tags || []) {
+        if (!series.tags.includes(t)) {
+          series.tags.push(t)
+        }
+      }
+    }
+
+    const result = Array.from(map.values())
+    for (const item of result) {
+      item.postsCount = item.posts.length
+      // 按章节序号或日期排序（正序）
+      item.posts.sort((a, b) => {
+        const partA = a.series?.part ?? 999
+        const partB = b.series?.part ?? 999
+        if (partA !== partB) return partA - partB
+        return new Date(a.date).getTime() - new Date(b.date).getTime()
+      })
+    }
+
+    return result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+  })
+
   function getPostBySlug(slug: string): BlogPostMeta | undefined {
     return posts.value.find((p) => p.slug === slug)
+  }
+
+  function getSeriesBySlug(slug: string): SeriesMeta | undefined {
+    return seriesList.value.find((s) => s.slug === slug)
+  }
+
+  /**
+   * 获取指定文章在所属专栏中的上下文与导航信息
+   */
+  function getPostSeriesContext(postSlug: string) {
+    const post = getPostBySlug(postSlug)
+    if (!post?.series?.slug) return null
+
+    const series = getSeriesBySlug(post.series.slug)
+    if (!series) return null
+
+    const currentIndex = series.posts.findIndex((p) => p.slug === postSlug)
+    if (currentIndex === -1) return null
+
+    return {
+      series,
+      currentPost: post,
+      currentIndex,
+      currentPart: post.series.part ?? (currentIndex + 1),
+      totalParts: series.postsCount,
+      prevInSeries: currentIndex > 0 ? series.posts[currentIndex - 1] : null,
+      nextInSeries: currentIndex < series.posts.length - 1 ? series.posts[currentIndex + 1] : null,
+      chapters: series.posts,
+    }
   }
 
   function setActiveTag(tag: string | null) {
@@ -77,9 +157,12 @@ export const useBlogStore = defineStore('blog', () => {
   return {
     posts,
     tags,
+    seriesList,
     activeTag,
     filteredPosts,
     getPostBySlug,
+    getSeriesBySlug,
+    getPostSeriesContext,
     setActiveTag,
     loadPostContent,
   }

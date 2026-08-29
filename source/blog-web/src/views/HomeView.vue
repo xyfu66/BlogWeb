@@ -95,6 +95,11 @@ function handlePageChange(page: number) {
             </div>
             <div class="stat-divider"></div>
             <div class="stat-item">
+              <span class="stat-num">{{ blogStore.seriesList.length }}</span>
+              <span class="stat-label">专栏</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
               <span class="stat-num">{{ blogStore.tags.length }}</span>
               <span class="stat-label">标签</span>
             </div>
@@ -102,6 +107,31 @@ function handlePageChange(page: number) {
           <router-link to="/about" class="author-about-btn">
             了解更多关于我 &rarr;
           </router-link>
+        </div>
+
+        <!-- Featured Series Widget -->
+        <div v-if="blogStore.seriesList.length > 0" class="series-widget bl-card">
+          <div class="widget-header">
+            <div class="widget-title">
+              <span class="widget-icon">📚</span>
+              精选专栏
+            </div>
+            <router-link to="/series" class="widget-more">全部 &rarr;</router-link>
+          </div>
+          <div class="widget-series-list">
+            <router-link
+              v-for="s in blogStore.seriesList"
+              :key="s.slug"
+              :to="{ name: 'series-detail', params: { slug: s.slug } }"
+              class="widget-series-item"
+            >
+              <div class="item-name">{{ s.name }}</div>
+              <div class="item-meta">
+                <span class="item-count">共 {{ s.postsCount }} 讲</span>
+                <span class="item-arrow">&rarr;</span>
+              </div>
+            </router-link>
+          </div>
         </div>
 
         <!-- Tag Cloud -->
@@ -310,6 +340,94 @@ function handlePageChange(page: number) {
 .author-about-btn:hover {
   color: var(--bl-accent-hover);
   text-decoration: underline;
+}
+
+/* Featured Series Widget */
+.series-widget {
+  padding: 1.25rem 1.5rem;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--bl-border);
+}
+
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--bl-text-highlight);
+}
+
+.widget-icon {
+  font-size: 1rem;
+}
+
+.widget-more {
+  font-size: 0.8125rem;
+  color: var(--bl-accent);
+  font-weight: 500;
+  transition: color var(--bl-dur-fast) var(--bl-ease);
+}
+
+.widget-more:hover {
+  color: var(--bl-accent-hover);
+}
+
+.widget-series-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.widget-series-item {
+  display: block;
+  padding: 0.75rem;
+  background: var(--bl-bg-secondary);
+  border: 1px solid var(--bl-border);
+  border-radius: var(--bl-radius-sm);
+  transition: all var(--bl-dur-fast) var(--bl-ease);
+}
+
+.widget-series-item:hover {
+  border-color: var(--bl-accent);
+  background: var(--bl-surface-hover);
+  transform: translateX(2px);
+}
+
+.item-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bl-text-highlight);
+  margin-bottom: 0.35rem;
+  line-height: 1.4;
+}
+
+.widget-series-item:hover .item-name {
+  color: var(--bl-accent);
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--bl-text-muted);
+}
+
+.item-arrow {
+  color: var(--bl-accent);
+  transition: transform var(--bl-dur-fast) var(--bl-ease);
+}
+
+.widget-series-item:hover .item-arrow {
+  transform: translateX(2px);
 }
 
 @media (max-width: 900px) {

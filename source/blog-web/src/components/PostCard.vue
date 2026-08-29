@@ -45,6 +45,19 @@ function goToDetail() {
           </svg>
           约 {{ post.readingTime }} 分钟阅读
         </span>
+
+        <template v-if="post.series">
+          <span class="meta-divider">•</span>
+          <router-link
+            :to="{ name: 'series-detail', params: { slug: post.series.slug } }"
+            class="meta-item series-pill-badge"
+            @click.stop
+          >
+            <span class="series-badge-icon">📚</span>
+            <span class="series-badge-name">{{ post.series.name }}</span>
+            <span v-if="post.series.part" class="series-badge-part">#{{ post.series.part }}</span>
+          </router-link>
+        </template>
       </div>
 
       <h2 class="post-title">
@@ -138,6 +151,39 @@ function goToDetail() {
 .external-badge {
   color: var(--bl-accent-green);
   font-weight: 500;
+}
+
+.series-pill-badge {
+  color: var(--bl-accent-purple);
+  background: var(--bl-accent-purple-soft);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--bl-radius-full);
+  font-weight: 500;
+  font-size: 0.75rem;
+  transition: all var(--bl-dur-fast) var(--bl-ease);
+  text-decoration: none;
+}
+
+.series-pill-badge:hover {
+  background: rgba(188, 140, 255, 0.25);
+  color: #d2a8ff;
+}
+
+.series-badge-icon {
+  font-size: 0.75rem;
+}
+
+.series-badge-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.series-badge-part {
+  font-family: var(--bl-font-mono);
+  font-weight: 700;
+  opacity: 0.9;
 }
 
 .meta-divider {

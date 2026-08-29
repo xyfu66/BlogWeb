@@ -3,6 +3,13 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+export interface PostSeriesInfo {
+  name: string
+  slug: string
+  part?: number
+  description?: string
+}
+
 export interface BlogPostMeta {
   slug: string
   title: string
@@ -11,10 +18,19 @@ export interface BlogPostMeta {
   summary: string
   readingTime: number
   link?: string
+  series?: PostSeriesInfo
 }
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts'
 const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
+
+function cleanQuotes(str: string): string {
+  let val = str.trim()
+  if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+    val = val.slice(1, -1)
+  }
+  return val
+}
 
 function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: BlogPostMeta; body: string } {
   const match = rawContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
@@ -24,6 +40,7 @@ function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: Blog
   let slug = defaultSlug
   let summary = ''
   let link: string | undefined = undefined
+  let series: PostSeriesInfo | undefined = undefined
   let body = rawContent
 
   if (match) {
@@ -31,16 +48,38 @@ function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: Blog
     body = match[2]
 
     const lines = yamlBlock.split(/\r?\n/)
+    let inSeriesBlock = false
+    const seriesTemp: Partial<PostSeriesInfo> = {}
+
     for (const line of lines) {
+      const trimmedLine = line.trim()
+      if (!trimmedLine || trimmedLine.startsWith('#')) continue
+
+      // Check indentation for nested series block
+      if (inSeriesBlock && (line.startsWith(' ') || line.startsWith('\t'))) {
+        const colonIdx = trimmedLine.indexOf(':')
+        if (colonIdx !== -1) {
+          const subKey = trimmedLine.slice(0, colonIdx).trim()
+          let subVal = cleanQuotes(trimmedLine.slice(colonIdx + 1))
+          if (subKey === 'name' || subKey === 'title') {
+            seriesTemp.name = subVal
+          } else if (subKey === 'slug') {
+            seriesTemp.slug = subVal
+          } else if (subKey === 'part' || subKey === 'order' || subKey === 'index') {
+            seriesTemp.part = parseInt(subVal, 10) || undefined
+          } else if (subKey === 'description' || subKey === 'desc' || subKey === 'summary') {
+            seriesTemp.description = subVal
+          }
+        }
+        continue
+      } else {
+        inSeriesBlock = false
+      }
+
       const colonIdx = line.indexOf(':')
       if (colonIdx === -1) continue
       const key = line.slice(0, colonIdx).trim()
-      let value = line.slice(colonIdx + 1).trim()
-
-      // Strip outer quotes
-      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-        value = value.slice(1, -1)
-      }
+      let value = cleanQuotes(line.slice(colonIdx + 1))
 
       if (key === 'title') {
         title = value
@@ -57,11 +96,35 @@ function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: Blog
           tags = value
             .slice(1, -1)
             .split(',')
-            .map((t) => t.trim().replace(/^['"]|['"]$/g, ''))
+            .map((t) => cleanQuotes(t.trim()))
             .filter(Boolean)
         } else if (value) {
           tags = [value]
         }
+      } else if (key === 'series') {
+        if (value) {
+          seriesTemp.name = value
+        } else {
+          inSeriesBlock = true
+        }
+      } else if (key === 'series_name') {
+        seriesTemp.name = value
+      } else if (key === 'series_slug') {
+        seriesTemp.slug = value
+      } else if (key === 'series_part' || key === 'series_order') {
+        seriesTemp.part = parseInt(value, 10) || undefined
+      } else if (key === 'series_description') {
+        seriesTemp.description = value
+      }
+    }
+
+    if (seriesTemp.name) {
+      const seriesSlug = seriesTemp.slug || seriesTemp.name.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, '')
+      series = {
+        name: seriesTemp.name,
+        slug: seriesSlug,
+        part: seriesTemp.part,
+        ...(seriesTemp.description ? { description: seriesTemp.description } : {}),
       }
     }
   }
@@ -83,6 +146,7 @@ function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: Blog
       summary,
       readingTime,
       ...(link ? { link } : {}),
+      ...(series ? { series } : {}),
     },
     body,
   }

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useBlogStore } from '@/stores/blog'
 import { renderMarkdownToSafeHtml, extractToc, type TocItem } from '@/utils/markdown'
 import TagBadge from '@/components/TagBadge.vue'
+import { usePostNavigation } from '@/composables/usePostNavigation'
 
 const props = defineProps<{
   slug: string
@@ -11,23 +12,33 @@ const props = defineProps<{
 
 const router = useRouter()
 const blogStore = useBlogStore()
+const { navigateToPost } = usePostNavigation()
 
 const loading = ref(true)
 const error = ref<string | null>(null)
 const rawMarkdown = ref('')
 const htmlContent = ref('')
 const tocList = ref<TocItem[]>([])
+const isSeriesChapterDrawerOpen = ref(false)
 
 const post = computed(() => {
   return blogStore.getPostBySlug(props.slug)
 })
 
-// 上一篇 / 下一篇导航
+// 专栏上下文
+const seriesContext = computed(() => {
+  return blogStore.getPostSeriesContext(props.slug)
+})
+
+// 全局上一篇 / 下一篇导航
 const currentIndex = computed(() => {
   return blogStore.posts.findIndex((p) => p.slug === props.slug)
 })
 
 const prevPost = computed(() => {
+  if (seriesContext.value) {
+    return seriesContext.value.prevInSeries
+  }
   if (currentIndex.value > 0) {
     return blogStore.posts[currentIndex.value - 1]
   }
@@ -35,6 +46,9 @@ const prevPost = computed(() => {
 })
 
 const nextPost = computed(() => {
+  if (seriesContext.value) {
+    return seriesContext.value.nextInSeries
+  }
   if (currentIndex.value >= 0 && currentIndex.value < blogStore.posts.length - 1) {
     return blogStore.posts[currentIndex.value + 1]
   }
@@ -64,6 +78,7 @@ watch(
   () => props.slug,
   () => {
     fetchContent()
+    isSeriesChapterDrawerOpen.value = false
     window.scrollTo({ top: 0, behavior: 'smooth' })
   },
 )
@@ -83,11 +98,19 @@ onMounted(() => {
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
-          返回列表
+          返回上一页
         </button>
         <div class="breadcrumb-trail">
           <router-link to="/">首页</router-link>
           <span class="divider">/</span>
+          <template v-if="seriesContext">
+            <router-link to="/series">专栏合集</router-link>
+            <span class="divider">/</span>
+            <router-link :to="{ name: 'series-detail', params: { slug: seriesContext.series.slug } }">
+              {{ seriesContext.series.name }}
+            </router-link>
+            <span class="divider">/</span>
+          </template>
           <span class="current-title">{{ post?.title || slug }}</span>
         </div>
       </nav>
@@ -141,30 +164,96 @@ onMounted(() => {
             </div>
           </header>
 
+          <!-- Series Callout Box (if post belongs to series) -->
+          <div v-if="seriesContext" class="series-callout">
+            <div class="callout-header">
+              <div class="callout-left">
+                <div class="callout-badge">
+                  <span class="badge-icon">📚</span>
+                  <span>专栏连载</span>
+                </div>
+                <div class="callout-info">
+                  <router-link
+                    :to="{ name: 'series-detail', params: { slug: seriesContext.series.slug } }"
+                    class="callout-title"
+                  >
+                    《{{ seriesContext.series.name }}》
+                  </router-link>
+                  <span class="callout-progress">
+                    第 {{ seriesContext.currentPart }} 讲 / 共 {{ seriesContext.totalParts }} 讲
+                  </span>
+                </div>
+              </div>
+
+              <div class="callout-right">
+                <button
+                  class="chapter-toggle-btn"
+                  @click="isSeriesChapterDrawerOpen = !isSeriesChapterDrawerOpen"
+                >
+                  <span>{{ isSeriesChapterDrawerOpen ? '收起目录' : '章节目录' }}</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    :class="{ 'rotate-icon': isSeriesChapterDrawerOpen }"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Expandable Chapters Drawer -->
+            <div v-if="isSeriesChapterDrawerOpen" class="callout-chapters">
+              <div
+                v-for="(chap, idx) in seriesContext.chapters"
+                :key="chap.slug"
+                class="callout-chap-item"
+                :class="{ 'is-current': chap.slug === slug }"
+                @click="navigateToPost(chap)"
+              >
+                <span class="chap-idx">{{ String(chap.series?.part ?? idx + 1).padStart(2, '0') }}</span>
+                <span class="chap-text">{{ chap.title }}</span>
+                <span v-if="chap.slug === slug" class="current-pill">正在阅读</span>
+                <span v-else-if="chap.link" class="ext-pill">微信原文</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Rendered Markdown Body -->
           <div class="markdown-body" v-html="htmlContent"></div>
 
           <!-- Article Footer Navigation -->
           <footer class="article-footer">
             <div class="nav-prev-next">
-              <router-link
+              <div
                 v-if="prevPost"
-                :to="{ name: 'post-detail', params: { slug: prevPost.slug } }"
                 class="post-nav-card prev-card"
+                @click="navigateToPost(prevPost)"
               >
-                <span class="nav-label">&larr; 上一篇</span>
+                <span class="nav-label">
+                  &larr; {{ seriesContext ? '专栏上一讲' : '上一篇' }}
+                </span>
                 <span class="nav-title">{{ prevPost.title }}</span>
-              </router-link>
+              </div>
               <div v-else class="post-nav-placeholder"></div>
 
-              <router-link
+              <div
                 v-if="nextPost"
-                :to="{ name: 'post-detail', params: { slug: nextPost.slug } }"
                 class="post-nav-card next-card"
+                @click="navigateToPost(nextPost)"
               >
-                <span class="nav-label">下一篇 &rarr;</span>
+                <span class="nav-label">
+                  {{ seriesContext ? '专栏下一讲' : '下一篇' }} &rarr;
+                </span>
                 <span class="nav-title">{{ nextPost.title }}</span>
-              </router-link>
+              </div>
             </div>
           </footer>
         </article>
@@ -334,6 +423,163 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+/* Series Callout */
+.series-callout {
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(188, 140, 255, 0.06));
+  border: 1px solid rgba(88, 166, 255, 0.25);
+  border-radius: var(--bl-radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.callout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.callout-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.callout-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bl-accent-soft);
+  color: var(--bl-accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--bl-radius-full);
+}
+
+.badge-icon {
+  font-size: 0.8125rem;
+}
+
+.callout-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.callout-title {
+  font-weight: 700;
+  color: var(--bl-text-highlight);
+  font-size: 1rem;
+  transition: color var(--bl-dur-fast) var(--bl-ease);
+}
+
+.callout-title:hover {
+  color: var(--bl-accent);
+}
+
+.callout-progress {
+  font-size: 0.8125rem;
+  color: var(--bl-accent-purple);
+  font-weight: 500;
+  background: var(--bl-accent-purple-soft);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--bl-radius-full);
+}
+
+.chapter-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bl-bg-secondary);
+  border: 1px solid var(--bl-border);
+  color: var(--bl-text-secondary);
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--bl-radius-sm);
+  cursor: pointer;
+  transition: all var(--bl-dur-fast) var(--bl-ease);
+}
+
+.chapter-toggle-btn:hover {
+  color: var(--bl-text-highlight);
+  border-color: var(--bl-accent);
+  background: var(--bl-surface-hover);
+}
+
+.rotate-icon {
+  transform: rotate(180deg);
+  transition: transform var(--bl-dur-fast) var(--bl-ease);
+}
+
+.callout-chapters {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(88, 166, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.callout-chap-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--bl-radius-sm);
+  cursor: pointer;
+  transition: all var(--bl-dur-fast) var(--bl-ease);
+}
+
+.callout-chap-item:hover {
+  background: var(--bl-surface-hover);
+}
+
+.callout-chap-item.is-current {
+  background: var(--bl-accent-soft);
+}
+
+.chap-idx {
+  font-family: var(--bl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--bl-accent);
+  width: 22px;
+}
+
+.chap-text {
+  font-size: 0.875rem;
+  color: var(--bl-text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.callout-chap-item:hover .chap-text {
+  color: var(--bl-accent);
+}
+
+.current-pill {
+  font-size: 0.7rem;
+  color: var(--bl-accent);
+  background: rgba(88, 166, 255, 0.2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.ext-pill {
+  font-size: 0.7rem;
+  color: var(--bl-accent-green);
+  background: var(--bl-accent-green-soft);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
 }
 
 /* Prev / Next Nav */
