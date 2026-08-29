@@ -85,25 +85,72 @@ sudo chown -R deploy:www-data /var/www/me
 sudo chmod -R 755 /var/www/me
 ```
 
-### 2. 宿主机 Nginx 配置建议
+### 2. 宿主机 Nginx 配置规范（模块化与防污染）
 
-在服务器 `/etc/nginx/sites-available/` 对应的站点配置文件中（或主 server 块内），添加如下 location 块：
+在同一域名下存在多个兄弟工程（如企业门户、个人博客等）时，为了**杜绝配置污染、防止全局正则劫持，并支持自动化安全发布**，推荐采用 **模块化 Snippet** 架构。
 
+#### 架构要点：
+1. **模块化解耦**：宿主机主 server 块只保留通用配置，通过 `include /etc/nginx/snippets/*.conf;` 动态引入各子项目。
+2. **防正则劫持 (`^~`)**：博客路由使用 `location ^~ /me/blog/`，强制在匹配该前缀后停止向下查找任何顶层正则规则（如兄弟工程可能定义的 `location ~* \.(js|css)`），彻底实现作用域隔离。
+3. **日常发布与 Nginx 解耦**：代码日常发布（`deploy-blog.ps1`）仅操作静态目录（原子替换），**无需修改或 reload Nginx**；仅在首次上线或路由规则变更时使用 `configure-nginx.ps1`。
+
+#### A. 方式一：本地一键自动化配置 Nginx (推荐)
+
+本地执行自动化脚本，将 `deploy/nginx/blog.conf` 安全推送至服务器，并在远端自动执行 `nginx -t` 测试与平滑重载（**若语法测试不通过将自动回滚，绝不破坏现有兄弟工程**）：
+
+```powershell
+# 1. 预检演练 (预览远程路径与执行脚本)
+powershell -ExecutionPolicy Bypass -File .\deploy\configure-nginx.ps1 -DryRun
+
+# 2. 正式一键同步并热重载 Nginx
+powershell -ExecutionPolicy Bypass -File .\deploy\configure-nginx.ps1
+
+# 3. 仅推送配置并语法检查，不触发 reload
+powershell -ExecutionPolicy Bypass -File .\deploy\configure-nginx.ps1 -SkipReload
+```
+
+#### B. 方式二：手动配置说明
+
+##### ① 宿主机主 Server 块设置
+在主站点配置文件（如 `/etc/nginx/sites-available/your-domain.conf`）中添加 include：
 ```nginx
-# 个人博客静态托管 (/me/blog/)
-location /me/blog/ {
+server {
+    listen 443 ssl http2;
+    server_name your.server.com;
+
+    # ... SSL 及全局 gzip 配置 ...
+
+    # 引入所有子模块的独立 location 片段
+    include /etc/nginx/snippets/*.conf;
+
+    # 根域名默认门户 (例如 CorpWeb)
+    location / {
+        root /var/www/corp;
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+##### ② 博客独立片段配置 (`/etc/nginx/snippets/blog-web.conf`)
+即工程内 `deploy/nginx/blog.conf` 的内容：
+```nginx
+# 使用 ^~ 彻底防止被其他兄弟工程的全局正则 location 劫持
+location ^~ /me/blog/ {
     alias /var/www/me/blog/;
     try_files $uri $uri/ /me/blog/index.html;
 
-    # 静态带 hash 资源长缓存 (30 天)
-    location ~* /me/blog/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
+    # 1. 前端构建产物 (Vite hash assets) 长效长缓存 (30 天)
+    # 使用 ^~ 前缀匹配并显式指定 alias，彻底避免 Nginx 嵌套正则无法继承 alias 的已知陷阱
+    location ^~ /me/blog/assets/ {
+        alias /var/www/me/blog/assets/;
         expires 30d;
         add_header Cache-Control "public, no-transform, immutable";
         access_log off;
     }
 
-    # 入口 HTML 严禁缓存，确保版本更新即时生效
+    # 2. SPA 入口 HTML 严禁缓存，确保版本即时生效并追加标准安全响应头
     location = /me/blog/index.html {
+        alias /var/www/me/blog/index.html;
         add_header Cache-Control "no-cache, no-store, must-revalidate";
         add_header X-Frame-Options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
@@ -114,10 +161,20 @@ location /me/blog/ {
 }
 ```
 
-测试并重载 Nginx：
-```bash
-sudo nginx -t
-sudo systemctl reload nginx
+#### C. 服务端权限配置建议 (Sudoers 最小权限)
+若 `deploy` 用户为非 root 账号，为支持自动化配置与安全重载，可在服务器 `/etc/sudoers.d/deploy` 中配置最小白名单：
+```sudoers
+deploy ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t, /bin/systemctl reload nginx, /usr/bin/mkdir -p /etc/nginx/snippets*, /usr/bin/cp /tmp/blog-web.conf.tmp /etc/nginx/snippets/*
+```
+
+---
+
+## 环境与连通性前置检查 (Preflight)
+
+在发布前或首次初始化后，可执行独立前置检测脚本快速排查环境隐患：
+```powershell
+# 执行本地工具链、deploy/.env、SSH 免密及远端目标目录的综合体检
+powershell -ExecutionPolicy Bypass -File .\deploy\scripts\preflight.ps1
 ```
 
 ---
@@ -133,15 +190,18 @@ powershell -ExecutionPolicy Bypass -File .\deploy\deploy-blog.ps1 -DryRun
 ```
 
 ### 2. 正式一键发布
-自动执行：依赖检测/安装 → 本地 `npm run build` 打包 → SCP 上传至 `.staging` → 远程原子替换 → 设置权限：
+自动执行：环境 Preflight 检查 → 依赖检测/安装 → 本地 `npm run build` 打包 → SCP 上传至 `.staging` → 远程原子替换 → 设置权限：
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\deploy\deploy-blog.ps1
 ```
 
-### 3. 跳过本地构建 (仅发布产物)
-若本地已经完成 `npm run build` 且 `source/blog-web/dist` 已存在，可跳过构建直接发布：
+### 3. 跳过构建或跳过前检 (可选参数)
 ```powershell
+# 跳过本地 build，仅发布既有产物
 powershell -ExecutionPolicy Bypass -File .\deploy\deploy-blog.ps1 -SkipBuild
+
+# 跳过前置网络与依赖检查
+powershell -ExecutionPolicy Bypass -File .\deploy\deploy-blog.ps1 -SkipPreflight
 ```
 
 ---

@@ -1,22 +1,20 @@
-# Build blog-web locally and atomic-deploy to remote host Nginx (not Docker).
+# Deploy & Hot-reload Nginx snippet safely with auto-rollback.
 param(
     [switch]$DryRun,
-    [switch]$SkipBuild,
+    [switch]$SkipReload,
     [switch]$SkipPreflight
 )
 
 $ErrorActionPreference = 'Stop'
 
 $script:ExitPreflight = 10
-$script:ExitBuild = 20
 $script:ExitDeploy = 30
+$script:ExitNginxConfig = 40
 
 $script:DeployRoot = $PSScriptRoot
-$script:RepoRoot = Split-Path -Parent $script:DeployRoot
 $script:PreflightScript = Join-Path $script:DeployRoot 'scripts/preflight.ps1'
 $script:DeployEnvPath = Join-Path $script:DeployRoot '.env'
-$script:BlogWebRoot = Join-Path $script:RepoRoot 'source/blog-web'
-$script:DistDir = Join-Path $script:BlogWebRoot 'dist'
+$script:NginxLocalConf = Join-Path $script:DeployRoot 'nginx/blog.conf'
 
 function Get-DeployConfig {
     if (-not (Test-Path $script:DeployEnvPath)) {
@@ -33,13 +31,16 @@ function Get-DeployConfig {
         $val = $line.Substring($idx + 1).Trim()
         $cfg[$key] = $val
     }
-    foreach ($required in @('SSH_HOST', 'SSH_USER', 'REMOTE_BLOG_DIR')) {
+    foreach ($required in @('SSH_HOST', 'SSH_USER')) {
         if (-not $cfg.ContainsKey($required) -or [string]::IsNullOrWhiteSpace($cfg[$required])) {
             Write-Error ('deploy/.env missing required key: {0}' -f $required)
             exit $script:ExitPreflight
         }
     }
     if (-not $cfg.ContainsKey('SSH_PORT')) { $cfg['SSH_PORT'] = '22' }
+    if (-not $cfg.ContainsKey('REMOTE_NGINX_CONF_PATH') -or [string]::IsNullOrWhiteSpace($cfg['REMOTE_NGINX_CONF_PATH'])) {
+        $cfg['REMOTE_NGINX_CONF_PATH'] = '/etc/nginx/snippets/blog-web.conf'
+    }
     return $cfg
 }
 
@@ -105,7 +106,12 @@ function Invoke-DeployScp {
     }
 }
 
-# --- Main execution ---
+# --- Pre-check ---
+if (-not (Test-Path $script:NginxLocalConf)) {
+    Write-Error ('Local Nginx template missing: {0}' -f $script:NginxLocalConf)
+    exit $script:ExitPreflight
+}
+
 $cfg = @{}
 if ($DryRun) {
     if (Test-Path $script:DeployEnvPath) {
@@ -115,70 +121,86 @@ if ($DryRun) {
             'SSH_HOST' = 'your.server.com'
             'SSH_USER' = 'deploy'
             'SSH_PORT' = '22'
-            'REMOTE_BLOG_DIR' = '/var/www/me/blog'
+            'REMOTE_NGINX_CONF_PATH' = '/etc/nginx/snippets/blog-web.conf'
         }
     }
 } else {
     $cfg = Get-DeployConfig
 }
 
-if (-not $SkipPreflight) {
+if (-not $SkipPreflight -and -not $DryRun) {
     if (Test-Path $script:PreflightScript) {
-        Write-Host "Running preflight environment check..." -ForegroundColor Cyan
-        & powershell -ExecutionPolicy Bypass -File $script:PreflightScript
+        Write-Host "Running preflight environment check (with Nginx sudo check)..." -ForegroundColor Cyan
+        & powershell -ExecutionPolicy Bypass -File $script:PreflightScript -CheckNginxSudo
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Preflight checks failed. Halting deployment."
+            Write-Error "Preflight checks failed. Halting Nginx configuration."
             exit $script:ExitPreflight
         }
     }
 }
 
-$remoteBlogDir = $cfg['REMOTE_BLOG_DIR'].TrimEnd('/')
-$stagingRemote = "$remoteBlogDir.staging"
-$bakRemote = "$remoteBlogDir.bak"
 $target = Get-SshTarget -Config $cfg
+$remoteConfPath = $cfg['REMOTE_NGINX_CONF_PATH']
+$remoteTmpUpload = '/tmp/blog-web.conf.tmp'
 
-if (-not $SkipBuild) {
-    Write-Host 'Building blog-web...'
-    Push-Location $script:BlogWebRoot
-    try {
-        if ($DryRun) {
-            Write-Host '[DryRun] npm ci && npm run build'
-        } else {
-            if (Test-Path 'package-lock.json') {
-                npm ci
-            } else {
-                npm install
-            }
-            if ($LASTEXITCODE -ne 0) { exit $script:ExitBuild }
-            npm run build
-            if ($LASTEXITCODE -ne 0) { exit $script:ExitBuild }
-        }
-    } finally {
-        Pop-Location
-    }
-} elseif (-not (Test-Path (Join-Path $script:DistDir 'index.html'))) {
-    Write-Error 'SkipBuild specified but dist/index.html is missing.'
-    exit $script:ExitBuild
+$reloadCommand = if (-not $SkipReload) {
+    'echo "Reloading Nginx service..."; sudo systemctl reload nginx || sudo nginx -s reload; echo "Nginx reload completed successfully."'
+} else {
+    'echo "SkipReload set - skipped Nginx reload."'
 }
 
-$swapCmd = "set -euo pipefail; if [ ! -f '$stagingRemote/index.html' ]; then echo 'staging missing index.html: $stagingRemote/index.html' >&2; exit 1; fi; rm -rf '$bakRemote'; if [ -d '$remoteBlogDir' ]; then mv '$remoteBlogDir' '$bakRemote'; fi; mv '$stagingRemote' '$remoteBlogDir'; mkdir -p '$stagingRemote'; chmod -R u=rwX,go=rX '$remoteBlogDir'; echo 'static atomic swap done'"
+$remoteScript = @"
+set -euo pipefail
+CONF_TARGET='$remoteConfPath'
+CONF_DIR=`$(dirname "`$CONF_TARGET")
+TMP_UPLOAD='$remoteTmpUpload'
+
+echo "Ensuring directory exists: `$CONF_DIR"
+sudo mkdir -p "`$CONF_DIR"
+
+# Backup existing configuration if present
+if [ -f "`$CONF_TARGET" ]; then
+    echo "Backing up existing config to `$CONF_TARGET.bak"
+    sudo cp "`$CONF_TARGET" "`$CONF_TARGET.bak"
+fi
+
+# Apply new snippet with proper permissions
+echo "Applying new configuration to `$CONF_TARGET..."
+sudo cp "`$TMP_UPLOAD" "`$CONF_TARGET"
+sudo chmod 644 "`$CONF_TARGET"
+rm -f "`$TMP_UPLOAD"
+
+# Validate configuration syntax before reloading
+echo "Testing Nginx configuration syntax (nginx -t)..."
+if sudo nginx -t; then
+    echo "Nginx configuration syntax test passed!"
+    $reloadCommand
+else
+    echo "ERROR: Nginx configuration test FAILED! Rolling back..." >&2
+    if [ -f "`$CONF_TARGET.bak" ]; then
+        sudo cp "`$CONF_TARGET.bak" "`$CONF_TARGET"
+        echo "Restored previous configuration backup." >&2
+    else
+        sudo rm -f "`$CONF_TARGET"
+        echo "Removed invalid new configuration." >&2
+    fi
+    exit 40
+fi
+"@
 
 if ($DryRun) {
-    Write-Host ('[DryRun] scp dist/. -> {0}:{1}/' -f $target, $stagingRemote)
-    Write-Host ('[DryRun] ssh {0} "{1}"' -f $target, $swapCmd)
+    Write-Host ('[DryRun] scp {0} -> {1}:{2}' -f $script:NginxLocalConf, $target, $remoteTmpUpload)
+    Write-Host "`n--- [DryRun] Remote Execution Script ---" -ForegroundColor Cyan
+    Write-Host $remoteScript
+    Write-Host "----------------------------------------`n" -ForegroundColor Cyan
     Write-Host 'DryRun completed successfully.'
     exit 0
 }
 
-Write-Host ('Preparing remote staging directory: {0}' -f $stagingRemote)
-Invoke-DeploySsh -Config $cfg -RemoteCommand ('mkdir -p ''{0}'' && rm -rf ''{0}''/*' -f $stagingRemote)
+Write-Host ('Uploading Nginx snippet to temporary path: {0}' -f $remoteTmpUpload)
+Invoke-DeployScp -Config $cfg -ScpArgs @($script:NginxLocalConf, ('{0}:{1}' -f $target, $remoteTmpUpload))
 
-Write-Host 'Uploading dist files to remote staging...'
-$dest = ('{0}:{1}/' -f $target, $stagingRemote)
-Invoke-DeployScp -Config $cfg -ScpArgs @('-r', (Join-Path $script:DistDir '.'), $dest)
+Write-Host 'Applying Nginx configuration on remote server...'
+Invoke-DeploySsh -Config $cfg -RemoteCommand $remoteScript
 
-Write-Host 'Performing atomic swap on remote host...'
-Invoke-DeploySsh -Config $cfg -RemoteCommand $swapCmd
-
-Write-Host 'deploy-blog completed successfully!'
+Write-Host 'Nginx automated configuration completed successfully!' -ForegroundColor Green
