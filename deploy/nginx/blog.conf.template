@@ -1,11 +1,12 @@
 # ==============================================================================
-# BlogWeb Nginx Location 参考配置（硬编码供快速查阅/直接复制）
-# 适用场景：追加至宿主机主站点 /etc/nginx/sites-available/corp-mss.conf 的 server { } 块
+# BlogWeb Nginx Location 配置模板
+# 架构定位：宿主机多项目共存体系下的子路径 SPA（挂载在 /me/blog/）
+# 变量来源：deploy/nginx/sites.env (由 install-nginx-sites.sh 或主站模板渲染)
 # ==============================================================================
 
 # 1. 静态资产长效缓存（Vite 构建 hash 资产，30 天不可变缓存）
 location ~* /me/blog/assets/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
-    root /var/www;
+    root ${REMOTE_BLOG_WEB_ROOT};
     expires 30d;
     add_header Cache-Control "public, no-transform, immutable";
     access_log off;
@@ -13,7 +14,7 @@ location ~* /me/blog/assets/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
 
 # 2. SPA 入口 index.html 防缓存（显式补齐安全响应头，修复 Nginx add_header 继承断层）
 location = /me/blog/index.html {
-    root /var/www;
+    root ${REMOTE_BLOG_WEB_ROOT};
     add_header Cache-Control "no-cache, no-store, must-revalidate";
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -24,6 +25,6 @@ location = /me/blog/index.html {
 
 # 3. 个人博客 SPA 路由分发（dist 部署于 /var/www/me/blog；root 取父根 /var/www）
 location /me/blog/ {
-    root /var/www;
+    root ${REMOTE_BLOG_WEB_ROOT};
     try_files $uri $uri/ /me/blog/index.html;
 }
