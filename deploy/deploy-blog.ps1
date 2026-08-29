@@ -31,7 +31,7 @@ function Get-DeployConfig {
         $val = $line.Substring($idx + 1).Trim()
         $cfg[$key] = $val
     }
-    foreach ($required in @('SSH_HOST', 'SSH_USER', 'REMOTE_REPO_ROOT', 'REMOTE_BLOG_DIR')) {
+    foreach ($required in @('SSH_HOST', 'SSH_USER', 'REMOTE_BLOG_DIR')) {
         if (-not $cfg.ContainsKey($required) -or [string]::IsNullOrWhiteSpace($cfg[$required])) {
             Write-Error ('deploy/.env missing required key: {0}' -f $required)
             exit $script:ExitPreflight
@@ -113,7 +113,6 @@ if ($DryRun) {
             'SSH_HOST' = 'your.server.com'
             'SSH_USER' = 'deploy'
             'SSH_PORT' = '22'
-            'REMOTE_REPO_ROOT' = '/opt/MusicStringStudioPro'
             'REMOTE_BLOG_DIR' = '/var/www/me/blog'
         }
     }
@@ -121,7 +120,9 @@ if ($DryRun) {
     $cfg = Get-DeployConfig
 }
 
-$stagingRemote = ($cfg['REMOTE_BLOG_DIR'].TrimEnd('/')) + '.staging'
+$remoteBlogDir = $cfg['REMOTE_BLOG_DIR'].TrimEnd('/')
+$stagingRemote = "$remoteBlogDir.staging"
+$bakRemote = "$remoteBlogDir.bak"
 $target = Get-SshTarget -Config $cfg
 
 if (-not $SkipBuild) {
@@ -148,9 +149,11 @@ if (-not $SkipBuild) {
     exit $script:ExitBuild
 }
 
+$swapCmd = "set -euo pipefail; if [ ! -f '$stagingRemote/index.html' ]; then echo 'staging missing index.html: $stagingRemote/index.html' >&2; exit 1; fi; rm -rf '$bakRemote'; if [ -d '$remoteBlogDir' ]; then mv '$remoteBlogDir' '$bakRemote'; fi; mv '$stagingRemote' '$remoteBlogDir'; mkdir -p '$stagingRemote'; chmod -R u=rwX,go=rX '$remoteBlogDir'; echo 'static atomic swap done'"
+
 if ($DryRun) {
     Write-Host ('[DryRun] scp dist/. -> {0}:{1}/' -f $target, $stagingRemote)
-    Write-Host ('[DryRun] ssh REMOTE_STATIC_DIR=''{0}'' bash ''{1}/deploy/scripts/remote/static-atomic-swap.sh''' -f $cfg['REMOTE_BLOG_DIR'], $cfg['REMOTE_REPO_ROOT'].TrimEnd('/'))
+    Write-Host ('[DryRun] ssh {0} "{1}"' -f $target, $swapCmd)
     Write-Host 'DryRun completed successfully.'
     exit 0
 }
@@ -163,8 +166,6 @@ $dest = ('{0}:{1}/' -f $target, $stagingRemote)
 Invoke-DeployScp -Config $cfg -ScpArgs @('-r', (Join-Path $script:DistDir '.'), $dest)
 
 Write-Host 'Performing atomic swap on remote host...'
-$swapScript = ($cfg['REMOTE_REPO_ROOT'].TrimEnd('/')) + '/deploy/scripts/remote/static-atomic-swap.sh'
-$swapCmd = ('REMOTE_STATIC_DIR=''{0}'' bash ''{1}''' -f $cfg['REMOTE_BLOG_DIR'], $swapScript)
 Invoke-DeploySsh -Config $cfg -RemoteCommand $swapCmd
 
 Write-Host 'deploy-blog completed successfully!'
