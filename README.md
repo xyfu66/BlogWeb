@@ -33,7 +33,7 @@ npm install   # 或 npm ci
 npm run dev
 ```
 
-默认开发端口为 `http://localhost:8040/me/blog/`。
+默认开发端口为 `http://localhost:8201/me/blog/`。
 
 ## 构建与类型检查
 
