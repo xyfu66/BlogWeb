@@ -5,7 +5,10 @@ export interface BlogPostMeta {
   tags: string[]
   summary: string
   readingTime: number
+  link?: string
 }
+
+export type PostNavigationTarget = Pick<BlogPostMeta, 'slug' | 'link'>
 
 export interface TagCount {
   name: string

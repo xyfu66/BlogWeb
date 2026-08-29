@@ -2,11 +2,14 @@
 import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSearch } from '@/composables/useSearch'
+import { usePostNavigation } from '@/composables/usePostNavigation'
+import type { PostNavigationTarget } from '@/types/post'
 import TagBadge from '@/components/TagBadge.vue'
 
 const route = useRoute()
 const router = useRouter()
 const { searchQuery, searchResults } = useSearch()
+const { navigateToPost } = usePostNavigation()
 const localInput = ref('')
 
 function syncFromQuery() {
@@ -24,8 +27,8 @@ function handleSearchSubmit() {
   router.replace({ name: 'search', query: q ? { q } : {} })
 }
 
-function selectPost(slug: string) {
-  router.push({ name: 'post-detail', params: { slug } })
+function selectPost(post: PostNavigationTarget) {
+  navigateToPost(post)
 }
 
 watch(() => route.query.q, syncFromQuery)
@@ -89,12 +92,13 @@ onMounted(() => {
           v-for="item in searchResults"
           :key="item.post.slug"
           class="result-item bl-card animate-fade-in"
-          @click="selectPost(item.post.slug)"
+          @click="selectPost(item.post)"
         >
           <div class="item-meta">
             <time>{{ item.post.date }}</time>
             <span>•</span>
-            <span>约 {{ item.post.readingTime }} 分钟阅读</span>
+            <span v-if="item.post.link" class="external-meta-tag">公众号外链 ↗</span>
+            <span v-else>约 {{ item.post.readingTime }} 分钟阅读</span>
           </div>
 
           <h2 class="item-title" v-html="item.highlightedTitle"></h2>
@@ -243,6 +247,11 @@ onMounted(() => {
   font-size: 0.8125rem;
   color: var(--bl-text-muted);
   margin-bottom: 0.5rem;
+}
+
+.external-meta-tag {
+  color: var(--bl-accent-green);
+  font-weight: 500;
 }
 
 .item-title {

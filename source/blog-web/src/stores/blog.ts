@@ -61,7 +61,7 @@ export const useBlogStore = defineStore('blog', () => {
         try {
           const raw = (await loader()) as string
           // 移除 frontmatter YAML 头
-          const cleanContent = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '')
+          const cleanContent = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '')
           contentCache.value[slug] = cleanContent
           return cleanContent
         } catch (err) {

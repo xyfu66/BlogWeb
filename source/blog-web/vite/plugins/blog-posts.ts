@@ -10,6 +10,7 @@ export interface BlogPostMeta {
   tags: string[]
   summary: string
   readingTime: number
+  link?: string
 }
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts'
@@ -22,6 +23,7 @@ function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: Blog
   let tags: string[] = []
   let slug = defaultSlug
   let summary = ''
+  let link: string | undefined = undefined
   let body = rawContent
 
   if (match) {
@@ -48,6 +50,8 @@ function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: Blog
         slug = value
       } else if (key === 'summary') {
         summary = value
+      } else if (key === 'link' || key === 'external_url' || key === 'url' || key === 'source_url') {
+        link = value
       } else if (key === 'tags') {
         if (value.startsWith('[') && value.endsWith(']')) {
           tags = value
@@ -78,6 +82,7 @@ function parseFrontmatter(rawContent: string, defaultSlug: string): { meta: Blog
       tags,
       summary,
       readingTime,
+      ...(link ? { link } : {}),
     },
     body,
   }

@@ -2,9 +2,12 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSearch } from '@/composables/useSearch'
+import { usePostNavigation } from '@/composables/usePostNavigation'
+import type { PostNavigationTarget } from '@/types/post'
 
 const router = useRouter()
 const { searchQuery, searchResults } = useSearch()
+const { navigateToPost } = usePostNavigation()
 const isFocused = ref(false)
 const inputRef = ref<HTMLInputElement | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
@@ -21,10 +24,10 @@ function handleEnter() {
   router.push({ name: 'search', query: { q } })
 }
 
-function selectPost(slug: string) {
+function selectPost(post: PostNavigationTarget) {
   isFocused.value = false
   searchQuery.value = ''
-  router.push({ name: 'post-detail', params: { slug } })
+  navigateToPost(post)
 }
 
 function handleClickOutside(e: MouseEvent) {
@@ -93,7 +96,7 @@ onUnmounted(() => {
             v-for="item in searchResults.slice(0, 5)"
             :key="item.post.slug"
             class="dropdown-item"
-            @click="selectPost(item.post.slug)"
+            @click="selectPost(item.post)"
           >
             <div class="item-title" v-html="item.highlightedTitle"></div>
             <div class="item-summary" v-html="item.highlightedSummary"></div>

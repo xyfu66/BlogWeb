@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import type { BlogPostMeta } from '@/types/post'
+import { usePostNavigation } from '@/composables/usePostNavigation'
 import TagBadge from './TagBadge.vue'
 
 const props = defineProps<{
   post: BlogPostMeta
 }>()
 
-const router = useRouter()
+const { navigateToPost } = usePostNavigation()
 
 function goToDetail() {
-  router.push({ name: 'post-detail', params: { slug: props.post.slug } })
+  navigateToPost(props.post)
 }
 </script>
 
 <template>
-  <article class="post-card bl-card" @click="goToDetail">
+  <article class="post-card bl-card" :class="{ 'is-external': !!post.link }" @click="goToDetail">
     <header class="card-header">
       <div class="card-meta">
         <time class="meta-item date">
@@ -30,7 +30,15 @@ function goToDetail() {
 
         <span class="meta-divider">•</span>
 
-        <span class="meta-item reading-time">
+        <span v-if="post.link" class="meta-item external-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          公众号外链
+        </span>
+        <span v-else class="meta-item reading-time">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
@@ -40,8 +48,18 @@ function goToDetail() {
       </div>
 
       <h2 class="post-title">
-        <a :href="`/me/blog/post/${post.slug}`" @click.prevent="goToDetail">
+        <a
+          :href="post.link || `/me/blog/post/${post.slug}`"
+          :target="post.link ? '_blank' : '_self'"
+          rel="noopener noreferrer"
+          @click.prevent="goToDetail"
+        >
           {{ post.title }}
+          <svg v-if="post.link" class="title-external-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
         </a>
       </h2>
     </header>
@@ -60,10 +78,13 @@ function goToDetail() {
       </div>
 
       <span class="read-more">
-        阅读正文
+        {{ post.link ? '打开微信原文' : '阅读正文' }}
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
+          <path v-if="post.link" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path>
+          <g v-else>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </g>
         </svg>
       </span>
     </footer>
@@ -114,6 +135,11 @@ function goToDetail() {
   gap: 0.35rem;
 }
 
+.external-badge {
+  color: var(--bl-accent-green);
+  font-weight: 500;
+}
+
 .meta-divider {
   color: var(--bl-border);
 }
@@ -124,6 +150,22 @@ function goToDetail() {
   line-height: 1.4;
   color: var(--bl-text-highlight);
   transition: color var(--bl-dur-fast) var(--bl-ease);
+}
+
+.post-title a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.title-external-icon {
+  opacity: 0.65;
+  transition: opacity var(--bl-dur-fast) var(--bl-ease), transform var(--bl-dur-fast) var(--bl-ease);
+}
+
+.post-card:hover .title-external-icon {
+  opacity: 1;
+  transform: translate(2px, -2px);
 }
 
 .post-title a:hover,
