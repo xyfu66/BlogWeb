@@ -1,8 +1,7 @@
 # Preflight verification script for BlogWeb deployment.
 # Verifies local environment, dependencies, deploy/.env, SSH credentials, and remote host readiness.
 param(
-    [switch]$CheckRemote,
-    [switch]$CheckNginxSudo
+    [switch]$CheckRemote
 )
 
 $ErrorActionPreference = 'Stop'
@@ -100,7 +99,6 @@ foreach ($key in $requiredKeys) {
 }
 
 if (-not $config.ContainsKey('SSH_PORT')) { $config['SSH_PORT'] = '22' }
-if (-not $config.ContainsKey('REMOTE_NGINX_CONF_PATH')) { $config['REMOTE_NGINX_CONF_PATH'] = '/etc/nginx/snippets/blog-web.conf' }
 
 Write-Host "`n=== [3/4] Checking SSH Credentials & Keys ===" -ForegroundColor Cyan
 
@@ -152,22 +150,6 @@ try {
     }
 } catch {
     Write-CheckWarn "Could not verify remote directory: $_"
-}
-
-# 3. Optional Nginx sudo check
-if ($CheckNginxSudo) {
-    $sudoCheckCmd = "sudo -n nginx -t 2>&1"
-    $sshSudoCheck = $sshArgs + @($target, $sudoCheckCmd)
-    try {
-        $sudoRes = & ssh @sshSudoCheck 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-CheckPass "Remote user '$($config['SSH_USER'])' has sudo permissions for 'nginx -t'"
-        } else {
-            Write-CheckWarn "Remote sudo 'nginx -t' returned non-zero. Sudoers may require password: $sudoRes"
-        }
-    } catch {
-        Write-CheckWarn "Sudo verification skipped or failed: $_"
-    }
 }
 
 Write-Host "`n========================================================" -ForegroundColor Cyan

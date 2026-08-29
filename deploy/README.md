@@ -35,16 +35,15 @@ SSH_USER=deploy
 SSH_PORT=22
 SSH_KEY=~/.ssh/id_ed25519
 
-# 宿主机静态目录与 Nginx 配置路径
+# 宿主机静态目录
 REMOTE_BLOG_DIR=/var/www/me/blog
-REMOTE_NGINX_CONF_PATH=/etc/nginx/snippets/blog-web.conf
 ```
 
 ---
 
 ## 第一步：环境预检 (Preflight)
 
-在正式发布或配置前，运行独立检测脚本，验证本地工具链、`deploy/.env` 参数、SSH 免密握手及远端目录权限：
+在正式发布前，运行独立检测脚本，验证本地工具链、`deploy/.env` 参数、SSH 免密握手及远端目录权限：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\deploy\scripts\preflight.ps1
@@ -56,79 +55,59 @@ powershell -ExecutionPolicy Bypass -File .\deploy\scripts\preflight.ps1
 
 ## 第二步：首次上线（服务端初始化与 Nginx 配置）
 
-### 1. 服务端目录与权限初始化
-SSH 登录服务器，创建静态托管目录并配置文件属主与权限：
+首次上线时，SSH 登录服务器完成一次性初始化配置。
+
+### 1. 创建静态托管目录与权限分配
 ```bash
+# 创建生产目录与暂存目录
 sudo mkdir -p /var/www/me/blog /var/www/me/blog.staging
+
+# 分配属主给 deploy 用户，组设为 www-data
 sudo chown -R deploy:www-data /var/www/me
 sudo chmod -R 755 /var/www/me
 ```
 
 ### 2. 宿主机 Nginx 配置
 
-#### 选项 A：本地一键自动化配置 (推荐)
-在本地执行脚本，自动将 `deploy/nginx/blog.conf` 安全同步至服务器并平滑重载（**若语法测试不通过将自动回滚，不影响兄弟工程**）：
-```powershell
-# 1. 预检演练 (预览远程脚本)
-powershell -ExecutionPolicy Bypass -File .\deploy\configure-nginx.ps1 -DryRun
+在服务器对应的站点配置文件中（如 `/etc/nginx/sites-available/` 或 `/etc/nginx/conf.d/` 对应的 `server` 块内），添加如下 location 块：
 
-# 2. 正式推送并热重载 Nginx
-powershell -ExecutionPolicy Bypass -File .\deploy\configure-nginx.ps1
+```nginx
+# 个人博客静态托管 (/me/blog/)
+location ^~ /me/blog/ {
+    alias /var/www/me/blog/;
+    try_files $uri $uri/ /me/blog/index.html;
+
+    # 前端构建产物长效缓存 (30 天)
+    location ^~ /me/blog/assets/ {
+        alias /var/www/me/blog/assets/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform, immutable";
+        access_log off;
+    }
+
+    # 入口 HTML 严禁缓存，确保版本即时生效
+    location = /me/blog/index.html {
+        alias /var/www/me/blog/index.html;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        expires 0;
+    }
+}
 ```
 
-#### 选项 B：手动配置
-1. **主站点配置**（在 `/etc/nginx/sites-available/your-domain.conf` 主 server 块内引入 snippet）：
-   ```nginx
-   server {
-       listen 443 ssl http2;
-       server_name your.server.com;
-
-       # 引入各子项目独立片段
-       include /etc/nginx/snippets/*.conf;
-
-       location / {
-           root /var/www/corp;
-           try_files $uri $uri/ /index.html;
-       }
-   }
-   ```
-2. **博客独立片段**（写入 `/etc/nginx/snippets/blog-web.conf`）：
-   ```nginx
-   # 使用 ^~ 避免被其他兄弟工程的全局正则 location 劫持
-   location ^~ /me/blog/ {
-       alias /var/www/me/blog/;
-       try_files $uri $uri/ /me/blog/index.html;
-
-       # 前端构建产物长效缓存 (30 天)
-       location ^~ /me/blog/assets/ {
-           alias /var/www/me/blog/assets/;
-           expires 30d;
-           add_header Cache-Control "public, no-transform, immutable";
-           access_log off;
-       }
-
-       # SPA 入口 HTML 严禁缓存
-       location = /me/blog/index.html {
-           alias /var/www/me/blog/index.html;
-           add_header Cache-Control "no-cache, no-store, must-revalidate";
-           add_header X-Frame-Options "SAMEORIGIN" always;
-           add_header X-Content-Type-Options "nosniff" always;
-           add_header X-XSS-Protection "1; mode=block" always;
-           add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-           expires 0;
-       }
-   }
-   ```
-3. **测试并重载**：
-   ```bash
-   sudo nginx -t && sudo systemctl reload nginx
-   ```
+### 3. 测试语法并重载 Nginx
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
 
 ---
 
 ## 第三步：日常代码发布
 
-日常代码迭代发布**无需修改或重启 Nginx**，所有命令在本地根目录执行。
+日常代码迭代发布**无需修改或重启 Nginx**，由 `deploy` 账号在本地执行一键自动化发布。
 
 ### 1. 预检演练 (DryRun)
 预览打包与远程文件传输流程，不执行实际修改：
@@ -173,4 +152,3 @@ sudo mv /var/www/me/blog.bak /var/www/me/blog
 | `10` | `ExitPreflight` | 前置检查失败（缺少 `deploy/.env`、必填配置缺失或工具缺失） |
 | `20` | `ExitBuild` | 本地前端构建失败（`npm install` / `npm run build` 报错） |
 | `30` | `ExitDeploy` | 远程部署失败（SSH / SCP 连接失败或原子替换命令异常） |
-| `40` | `ExitNginxConfig` | Nginx 配置语法检测失败并已自动回滚 |
