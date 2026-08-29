@@ -8,9 +8,10 @@
 BlogWeb/
 ├── .gitignore
 ├── README.md
-├── deploy/                # 轻量部署脚本与环境配置示例
-│   ├── .env.example
-│   └── deploy-blog.ps1
+├── deploy/                # 自动化部署脚本与发布流程说明
+│   ├── .env.example       # 部署环境变量配置模板
+│   ├── deploy-blog.ps1    # 本机构建与远程原子替换发布脚本
+│   └── README.md          # 详细部署与运维手册
 ├── doc/                   # 项目文档与规划
 └── source/
     └── blog-web/          # Vue 3 + Vite + TypeScript 前端工程
@@ -42,17 +43,4 @@ cd source/blog-web
 npm run build
 ```
 
-## 自动化部署
 
-部署脚本位于 `deploy/` 目录：
-
-1. 复制 `deploy/.env.example` 为 `deploy/.env` 并填写远程服务器 SSH 与路径信息。
-2. 在 PowerShell 中执行部署：
-
-```powershell
-# 预检演练 (DryRun)
-powershell -ExecutionPolicy Bypass -File .\deploy\deploy-blog.ps1 -DryRun
-
-# 正式发布
-powershell -ExecutionPolicy Bypass -File .\deploy\deploy-blog.ps1
-```
