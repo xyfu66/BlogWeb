@@ -37,7 +37,7 @@ const techSkills = [
           </div>
           <div class="profile-heading">
             <h1 class="profile-name">BitVortex Tech</h1>
-            <p class="profile-tagline">全栈架构师 & 音频算法工程师</p>
+            <p class="profile-tagline">全栈架构师 & 算法工程师</p>
           </div>
         </div>
       </div>
@@ -55,7 +55,7 @@ const techSkills = [
             欢迎来到我的个人技术博客。我是一名深耕于现代 Web 全栈技术、分布式架构与音频算法工程的工程师。
           </p>
           <p>
-            目前主要负责 <strong>BitVortex</strong> 及 <strong>MusicStringStudioPro (MSS)</strong> 核心系统的架构设计与工程落地。MSS 是一款基于尖端音频算法与乐谱编排引擎的专业音乐制作平台，支持大规模多音轨编排、智能打分与实时伴奏合成。
+            目前主要负责 <strong>BitVortex</strong> 及 <strong>节拍律动</strong> 核心系统的架构设计与工程落地。[节拍律动]是一款基于尖端音频算法与乐谱编排引擎的专业音乐制作平台，支持大规模多音轨编排、智能打分与实时伴奏合成。
           </p>
           <p>
             在这里，我将持续分享关于前端性能极致优化、大规模系统高可用设计、现代微服务交付流水线以及音频信号处理等领域的实践总结与架构思考。
@@ -105,7 +105,7 @@ const techSkills = [
         <div class="projects-list">
           <div class="project-item">
             <div class="project-header">
-              <h3 class="project-name">MusicStringStudioPro (MSS)</h3>
+              <h3 class="project-name">节拍律动</h3>
               <span class="project-badge">核心产品</span>
             </div>
             <p class="project-desc">

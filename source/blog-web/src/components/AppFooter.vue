@@ -18,7 +18,7 @@ const currentYear = new Date().getFullYear()
         </a>
         <span class="link-divider">/</span>
         <a href="/mss/" target="_blank" rel="noopener noreferrer" class="footer-link">
-          MusicStringStudioPro
+          节拍律动
         </a>
         <span class="link-divider">/</span>
         <router-link to="/about" class="footer-link">
