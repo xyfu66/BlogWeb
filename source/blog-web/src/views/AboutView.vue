@@ -1,10 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
-const resumeUrl = computed(() => {
-  return `${import.meta.env.BASE_URL}assets/resume.pdf`
-})
-
 const techSkills = [
   {
     category: '前端工程与体系',
@@ -60,22 +54,6 @@ const techSkills = [
           <p>
             在这里，我将持续分享关于前端性能极致优化、大规模系统高可用设计、现代微服务交付流水线以及音频信号处理等领域的实践总结与架构思考。
           </p>
-        </div>
-
-        <!-- Download Resume Action -->
-        <div class="resume-cta-box">
-          <div class="resume-info">
-            <div class="resume-title">个人履历 / 简历</div>
-            <div class="resume-desc">获取完整的专业经历、主导项目架构与技术专长说明 (PDF)</div>
-          </div>
-          <a :href="resumeUrl" download="resume.pdf" class="download-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            下载完整简历 (PDF)
-          </a>
         </div>
       </section>
 
@@ -247,51 +225,6 @@ const techSkills = [
   color: var(--bl-text-highlight);
 }
 
-/* Resume CTA */
-.resume-cta-box {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: var(--bl-bg-secondary);
-  border: 1px solid var(--bl-border);
-  border-radius: var(--bl-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.resume-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--bl-text-highlight);
-  margin-bottom: 0.25rem;
-}
-
-.resume-desc {
-  font-size: 0.875rem;
-  color: var(--bl-text-muted);
-}
-
-.download-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--bl-accent);
-  color: #0d1117;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  border-radius: var(--bl-radius-sm);
-  transition: all var(--bl-dur-fast) var(--bl-ease);
-  flex-shrink: 0;
-}
-
-.download-btn:hover {
-  background: var(--bl-accent-hover);
-  box-shadow: var(--bl-shadow-glow);
-  transform: translateY(-1px);
-}
 
 /* Skills Grid */
 .skills-grid {
@@ -403,10 +336,6 @@ const techSkills = [
     grid-template-columns: 1fr;
   }
 
-  .resume-cta-box {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 
   .about-section {
     padding: 1.5rem;

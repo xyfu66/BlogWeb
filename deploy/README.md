@@ -86,36 +86,9 @@ Copy-Item .\deploy\.env.example .\deploy\.env
 Copy-Item .\deploy\nginx\sites.env.example .\deploy\nginx\sites.env
 ```
 
-编辑 `deploy/.env`，填写实际服务器信息：
-```ini
-# SSH 连接
-SSH_HOST=bitvortex.vip
-SSH_USER=deploy
-SSH_PORT=22
-SSH_KEY=~/.ssh/id_ed25519
+编辑 `deploy/.env`，填写实际服务器信息。
 
-# 博客静态托管目录（宿主机 Nginx 路径；非 Docker）
-REMOTE_BLOG_DIR=/var/www/me/blog
-
-# 远程仓库根（服务器上已 clone 的路径）
-REMOTE_REPO_ROOT=/opt/BlogWeb
-
-# 发布行为
-GIT_REMOTE_BRANCH=master
-DEPLOY_PROFILE=prod
-```
-
-编辑 `deploy/nginx/sites.env`，填写宿主机绑机信息：
-```ini
-# 宿主机绑机域名
-BLOG_DOMAIN=bitvortex.vip
-
-# 宿主机静态父根目录（Nginx root 使用）
-REMOTE_BLOG_WEB_ROOT=/var/www
-
-# 博客静态发布目录（与 deploy/.env 中 REMOTE_BLOG_DIR 保持一致）
-REMOTE_BLOG_DIR=/var/www/me/blog
-```
+编辑 `deploy/nginx/sites.env`，填写宿主机绑机信息。
 
 ---
 
