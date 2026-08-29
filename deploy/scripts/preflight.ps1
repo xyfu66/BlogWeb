@@ -1,165 +1,65 @@
-# Preflight verification script for BlogWeb deployment.
-# Verifies local environment, dependencies, deploy/.env, SSH credentials, and remote host readiness.
+# Preflight: Check local tools, deploy config, SSH reachability probe, and sync sites.env.
 param(
-    [switch]$CheckRemote
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = 'Stop'
-$script:ExitPreflight = 10
+. "$PSScriptRoot/lib/common.ps1"
 
-$script:ScriptsDir = $PSScriptRoot
-$script:DeployRoot = Split-Path -Parent $script:ScriptsDir
-$script:RepoRoot = Split-Path -Parent $script:DeployRoot
-$script:DeployEnvPath = Join-Path $script:DeployRoot '.env'
-$script:BlogWebRoot = Join-Path $script:RepoRoot 'source/blog-web'
+Write-Host '===> Running Preflight Checks...' -ForegroundColor Cyan
 
-$script:PassedChecks = 0
-$script:FailedChecks = 0
+# 1. Local tools check
+Test-LocalTools
+Write-Host '[OK] Local tools found (node, npm, ssh, scp)' -ForegroundColor Green
 
-function Write-CheckPass {
-    param([string]$Message)
-    Write-Host ("[PASS] " + $Message) -ForegroundColor Green
-    $script:PassedChecks++
+# 2. Load deploy configuration
+$cfg = Get-DeployConfig -DryRun:$DryRun
+$target = Get-SshTarget -Config $cfg
+Write-Host ('[OK] Deploy target: {0} (Port: {1})' -f $target, $cfg['SSH_PORT']) -ForegroundColor Green
+
+# 3. Domain placeholder check
+if (-not $DryRun) {
+    Test-DomainNotPlaceholder -Config $cfg
 }
 
-function Write-CheckFail {
-    param([string]$Message)
-    Write-Host ("[FAIL] " + $Message) -ForegroundColor Red
-    $script:FailedChecks++
+# 4. SSH reachability probe (BatchMode=yes)
+if ($DryRun) {
+    Write-Host '[DryRun] SSH connectivity test skipped' -ForegroundColor Yellow
+    Sync-NginxSitesEnv -Config $cfg -DryRun
+    Write-Host 'Preflight OK (DryRun)' -ForegroundColor Green
+    exit 0
 }
 
-function Write-CheckWarn {
-    param([string]$Message)
-    Write-Host ("[WARN] " + $Message) -ForegroundColor Yellow
-}
-
-function Get-DeployConfig {
-    if (-not (Test-Path $script:DeployEnvPath)) {
-        Write-CheckFail "deploy/.env does not exist. Please copy deploy/.env.example to deploy/.env and configure it."
-        exit $script:ExitPreflight
-    }
-    $cfg = @{}
-    foreach ($line in Get-Content $script:DeployEnvPath -Encoding UTF8) {
-        $line = $line.Trim()
-        if ($line -eq '' -or $line.StartsWith('#')) { continue }
-        $idx = $line.IndexOf('=')
-        if ($idx -lt 1) { continue }
-        $key = $line.Substring(0, $idx).Trim()
-        $val = $line.Substring($idx + 1).Trim()
-        $cfg[$key] = $val
-    }
-    return $cfg
-}
-
-Write-Host "=== [1/4] Checking Local Toolchain ===" -ForegroundColor Cyan
-
-# 1. Check Node.js
-try {
-    $nodeVer = (node --version 2>&1).ToString().Trim()
-    Write-CheckPass "Node.js installed: $nodeVer"
-} catch {
-    Write-CheckFail "Node.js is not installed or not in PATH."
-}
-
-# 2. Check npm
-try {
-    $npmVer = (npm --version 2>&1).ToString().Trim()
-    Write-CheckPass "npm installed: v$npmVer"
-} catch {
-    Write-CheckFail "npm is not installed or not in PATH."
-}
-
-# 3. Check OpenSSH client (ssh and scp)
-try {
-    $sshCmd = Get-Command ssh -ErrorAction Stop
-    $sshVer = (cmd.exe /c "ssh -V 2>&1").Trim()
-    Write-CheckPass "OpenSSH client available: $sshVer ($($sshCmd.Source))"
-} catch {
-    Write-CheckFail "ssh is not installed or not in PATH."
-}
-
-try {
-    $scpCmd = Get-Command scp -ErrorAction Stop
-    Write-CheckPass "scp command is available ($($scpCmd.Source))"
-} catch {
-    Write-CheckFail "scp is not installed or not in PATH."
-}
-
-Write-Host "`n=== [2/4] Checking Configuration (deploy/.env) ===" -ForegroundColor Cyan
-
-$config = Get-DeployConfig
-
-$requiredKeys = @('SSH_HOST', 'SSH_USER', 'REMOTE_BLOG_DIR')
-foreach ($key in $requiredKeys) {
-    if ($config.ContainsKey($key) -and -not [string]::IsNullOrWhiteSpace($config[$key])) {
-        Write-CheckPass "Config key '$key' = '$($config[$key])'"
-    } else {
-        Write-CheckFail "Missing required configuration key: $key in deploy/.env"
-    }
-}
-
-if (-not $config.ContainsKey('SSH_PORT')) { $config['SSH_PORT'] = '22' }
-
-Write-Host "`n=== [3/4] Checking SSH Credentials & Keys ===" -ForegroundColor Cyan
-
-$sshKeyPath = $null
-if ($config.ContainsKey('SSH_KEY') -and -not [string]::IsNullOrWhiteSpace($config['SSH_KEY'])) {
-    $sshKeyPath = $config['SSH_KEY'].Replace('~', $env:USERPROFILE)
-    if (Test-Path $sshKeyPath) {
-        Write-CheckPass "SSH private key found at: $sshKeyPath"
-    } else {
-        Write-CheckFail "SSH private key file NOT found: $sshKeyPath"
-    }
-} else {
-    Write-CheckWarn "SSH_KEY is not configured in deploy/.env (will rely on default ssh-agent or ~/.ssh/id_rsa)"
-}
-
-Write-Host "`n=== [4/4] Checking Remote Server Connectivity & Environment ===" -ForegroundColor Cyan
-
-$target = "$($config['SSH_USER'])@$($config['SSH_HOST'])"
-$sshArgs = @('-p', $config['SSH_PORT'], '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=accept-new', '-o', 'ConnectTimeout=10')
-if ($sshKeyPath) {
-    $sshArgs += @('-i', $sshKeyPath)
-}
-
-# 1. Test SSH connectivity with BatchMode
-$sshTestTarget = $sshArgs + @($target, 'echo preflight_ssh_ok')
-try {
-    $res = & ssh @sshTestTarget 2>&1
-    if ($LASTEXITCODE -eq 0 -and $res -match 'preflight_ssh_ok') {
-        Write-CheckPass "SSH non-interactive connection to $target succeeded"
-    } else {
-        Write-CheckFail "SSH connection failed: $res (Exit code: $LASTEXITCODE)"
-    }
-} catch {
-    Write-CheckFail "SSH connection threw an exception: $_"
-}
-
-# 2. Check remote blog parent directory
-$remoteDir = $config['REMOTE_BLOG_DIR']
-$checkDirCmd = "if [ -d '$remoteDir' ]; then echo 'DIR_EXISTS'; else mkdir -p '$remoteDir' 2>/dev/null && echo 'DIR_CREATED' || echo 'DIR_NO_PERMISSION'; fi"
-$sshDirCheck = $sshArgs + @($target, $checkDirCmd)
-try {
-    $dirRes = (& ssh @sshDirCheck 2>&1).ToString().Trim()
-    if ($dirRes -match 'DIR_EXISTS') {
-        Write-CheckPass "Remote target directory '$remoteDir' exists and is ready"
-    } elseif ($dirRes -match 'DIR_CREATED') {
-        Write-CheckPass "Remote target directory '$remoteDir' created successfully"
-    } else {
-        Write-CheckWarn "Remote target directory '$remoteDir' does not exist or user lacks permission to create it directly"
-    }
-} catch {
-    Write-CheckWarn "Could not verify remote directory: $_"
-}
-
-Write-Host "`n========================================================" -ForegroundColor Cyan
-Write-Host " Preflight Summary: $script:PassedChecks Passed, $script:FailedChecks Failed" -ForegroundColor $(if ($script:FailedChecks -eq 0) { "Green" } else { "Red" })
-Write-Host "========================================================" -ForegroundColor Cyan
-
-if ($script:FailedChecks -gt 0) {
-    Write-Error "Preflight checks failed with $script:FailedChecks error(s). Please fix the issues above before deploying."
+$sshArgs = @(Get-SshBaseArgs -Config $cfg) + @($target, 'echo deploy-preflight-ok')
+$probe = & ssh @sshArgs 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host ($probe | Out-String) -ForegroundColor Red
+    Write-Error ('SSH unreachable with key authentication: {0}. Ensure SSH_KEY is added to authorized_keys.' -f $target)
     exit $script:ExitPreflight
 }
+Write-Host ('[OK] SSH connection successful: {0}' -f ($probe | Out-String).Trim()) -ForegroundColor Green
 
-Write-Host "All preflight checks passed! System is ready for deployment.`n" -ForegroundColor Green
-exit 0
+# 5. Remote repository root probe (existence and writability)
+$checkRepoCmd = ('test -d ''{0}'' && test -w ''{0}'' && test -w ''{0}/deploy''' -f $cfg['REMOTE_REPO_ROOT'])
+$sshRepoArgs = @(Get-SshBaseArgs -Config $cfg) + @($target, $checkRepoCmd)
+& ssh @sshRepoArgs | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Error ('Remote REMOTE_REPO_ROOT ({0}) does not exist or is not writable by user ''{1}''. Ensure git clone is completed and fix ownership on server: sudo chown -R {1}:{1} {0}' -f $cfg['REMOTE_REPO_ROOT'], $cfg['SSH_USER'])
+    exit $script:ExitPreflight
+}
+Write-Host ('[OK] Remote repository root found and writable: {0}' -f $cfg['REMOTE_REPO_ROOT']) -ForegroundColor Green
+
+# 6. Remote target directory permissions
+$checkDirCmd = ('mkdir -p ''{0}'' && test -w ''{0}''' -f $cfg['REMOTE_BLOG_DIR'])
+$sshDirArgs = @(Get-SshBaseArgs -Config $cfg) + @($target, $checkDirCmd)
+& ssh @sshDirArgs | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Error ('Remote target directory not writable or parent permission denied: {0}' -f $cfg['REMOTE_BLOG_DIR'])
+    exit $script:ExitPreflight
+}
+Write-Host ('[OK] Remote target directory is writable: {0}' -f $cfg['REMOTE_BLOG_DIR']) -ForegroundColor Green
+
+# 7. Synchronize Nginx sites.env & template
+Sync-NginxSitesEnv -Config $cfg
+
+Write-Host 'Preflight OK' -ForegroundColor Green
