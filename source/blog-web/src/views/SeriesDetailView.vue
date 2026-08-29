@@ -213,7 +213,7 @@ watch(
                 class="other-series-item"
               >
                 <span class="other-name">{{ s.name }}</span>
-                <span class="other-count">{{ s.postsCount }} 讲</span>
+                <span class="other-count">{{ s.postsCount }} 篇</span>
               </router-link>
             </div>
           </div>

@@ -127,7 +127,7 @@ function handlePageChange(page: number) {
             >
               <div class="item-name">{{ s.name }}</div>
               <div class="item-meta">
-                <span class="item-count">共 {{ s.postsCount }} 讲</span>
+                <span class="item-count">共 {{ s.postsCount }} 篇</span>
                 <span class="item-arrow">&rarr;</span>
               </div>
             </router-link>

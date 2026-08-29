@@ -180,7 +180,7 @@ onMounted(() => {
                     《{{ seriesContext.series.name }}》
                   </router-link>
                   <span class="callout-progress">
-                    第 {{ seriesContext.currentPart }} 讲 / 共 {{ seriesContext.totalParts }} 讲
+                    第 {{ seriesContext.currentPart }} 篇 / 共 {{ seriesContext.totalParts }} 篇
                   </span>
                 </div>
               </div>
@@ -250,7 +250,7 @@ onMounted(() => {
                 @click="navigateToPost(nextPost)"
               >
                 <span class="nav-label">
-                  {{ seriesContext ? '专栏下一讲' : '下一篇' }} &rarr;
+                  {{ seriesContext ? '专栏下一篇' : '下一篇' }} &rarr;
                 </span>
                 <span class="nav-title">{{ nextPost.title }}</span>
               </div>

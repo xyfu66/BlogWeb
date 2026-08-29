@@ -64,7 +64,7 @@ function goToSeries(slug: string) {
                 </svg>
                 专栏连载
               </span>
-              <span class="series-count-pill">共 {{ series.postsCount }} 讲</span>
+              <span class="series-count-pill">共 {{ series.postsCount }} 篇</span>
             </div>
 
             <h2 class="series-title">{{ series.name }}</h2>
