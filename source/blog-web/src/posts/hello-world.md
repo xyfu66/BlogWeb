@@ -18,14 +18,7 @@ summary: "记录本博客的工程架构选型与设计理念：基于 Vue 3 + V
 
 1. **零维护成本**：无需运行额外的后端服务进程或数据库实例，避免数据库注入与安全漏洞。
 2. **极速响应与防缓存**：HTML 与静态资源托管于 Nginx，利用 HTTP 缓存机制与原子文件替换达到毫秒级首屏加载。
-3. **与兄弟工程共存**：博客作为 `bitvortex.vip` 域名下的 `/me/blog/` 子路径，通过 Nginx 反向代理与现有企业站、`MusicStringStudioPro (MSS)` 隔离共用。
-
-```
-bitvortex.vip/           → 企业介绍站  (/var/www/corp)
-bitvortex.vip/mss/       → MSS 控制台  (/var/www/mss)
-bitvortex.vip/me/blog/   → 个人博客    (/var/www/me/blog)
-mss-admin.bitvortex.vip/ → 运营后台    (/var/www/mss-admin)
-```
+3. **与兄弟工程共存**：博客作为 `bitvortex.vip` 域名下的 `/me/blog/` 子路径，通过 Nginx 反向代理与现有站点共用。
 
 ---
 
