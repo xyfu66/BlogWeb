@@ -3,11 +3,7 @@ title: "Vue 3.5 + Canvas 交互工作台：大文件 PDF 虚拟化渲染与坐�
 date: "2026-08-30"
 tags: ["Vue 3.5", "Vite", "Pinia", "Canvas", "pdfjs-dist", "前端性能"]
 slug: "enterprise-ai-ocr-part-5-vue3-canvas-pdf-workbench"
-series:
-  name: "企业级多模态 AI-OCR 智能体与高性能全栈架构实战"
-  slug: "enterprise-ai-ocr-agent-architecture"
-  part: 5
-  description: "聚焦纯技术架构与工程落地，系统性拆解基于 Java 21 + Spring Boot 3.5、Vue 3.5 与 AWS Bedrock 多模态视觉大模型的企业级 AI-OCR 智能体：从混合文档解析、视觉切片、Agent 自愈反思闭环，到 Resilience4j 防御性容错设计、前端 Canvas 坐标级双向联动与云原生 Fargate 部署。"
+part: 5
 summary: "深入剖析基于 Vue 3.5、Pinia 与 Canvas 的企业级 IDP 交互工作台实现：详解 pdfjs-dist + Web Worker 多线程离屏渲染与内存自动回收、超长大文件虚拟滚动（Virtual Scrolling），以及表单字段与 PDF 画布区域的空间坐标（Bounding Box）双向联动交互设计。"
 ---
 

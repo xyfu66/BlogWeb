@@ -3,11 +3,7 @@ title: "Agentic 校验闭环：可信规则引擎、自我反思纠错（Self-Co
 date: "2026-08-30"
 tags: ["AI Agent", "自我反思", "规则引擎", "HITL", "可信AI"]
 slug: "enterprise-ai-ocr-part-4-agentic-reflection-validation"
-series:
-  name: "企业级多模态 AI-OCR 智能体与高性能全栈架构实战"
-  slug: "enterprise-ai-ocr-agent-architecture"
-  part: 4
-  description: "聚焦纯技术架构与工程落地，系统性拆解基于 Java 21 + Spring Boot 3.5、Vue 3.5 与 AWS Bedrock 多模态视觉大模型的企业级 AI-OCR 智能体：从混合文档解析、视觉切片、Agent 自愈反思闭环，到 Resilience4j 防御性容错设计、前端 Canvas 坐标级双向联动与云原生 Fargate 部署。"
+part: 4
 summary: "系统性解构多模态 AI-OCR 智能体的可信自愈中枢：设计基于 Spring AOP 的声明式业务一致性校验器，构建带错误堆栈反馈与局部视觉放大的 Agentic Reflection Loop（自我反思纠错回路），并提出多维置信度量化模型与人机协同（HITL）分流机制。"
 ---
 

@@ -3,11 +3,7 @@ title: "高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudF
 date: "2026-08-30"
 tags: ["Resilience4j", "高可用", "AWS Fargate", "CloudFormation", "DevOps"]
 slug: "enterprise-ai-ocr-part-6-resilience4j-cloud-iac"
-series:
-  name: "企业级多模态 AI-OCR 智能体与高性能全栈架构实战"
-  slug: "enterprise-ai-ocr-agent-architecture"
-  part: 6
-  description: "聚焦纯技术架构与工程落地，系统性拆解基于 Java 21 + Spring Boot 3.5、Vue 3.5 与 AWS Bedrock 多模态视觉大模型的企业级 AI-OCR 智能体：从混合文档解析、视觉切片、Agent 自愈反思闭环，到 Resilience4j 防御性容错设计、前端 Canvas 坐标级双向联动与云原生 Fargate 部署。"
+part: 6
 summary: "全面复盘企业级 IDP 系统的生产级韧性架构与云原生部署交付：深入配置 Resilience4j 熔断器、限流器、重试与隔离舱组合防线以应对外部大模型 API 抖动，详解 S3 预签名 URL 安全分发，并给出基于 AWS CloudFormation (IaC) 与 ECS Fargate 的自动化部署实战。"
 ---
 

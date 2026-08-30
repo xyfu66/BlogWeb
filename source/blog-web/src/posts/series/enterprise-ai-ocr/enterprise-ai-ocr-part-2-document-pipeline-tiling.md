@@ -3,11 +3,7 @@ title: "多源异构文档处理管线：从混合解析到视觉高动态切片
 date: "2026-08-30"
 tags: ["PDFBox", "图像处理", "动态切片", "VLM", "文档管线"]
 slug: "enterprise-ai-ocr-part-2-document-pipeline-tiling"
-series:
-  name: "企业级多模态 AI-OCR 智能体与高性能全栈架构实战"
-  slug: "enterprise-ai-ocr-agent-architecture"
-  part: 2
-  description: "聚焦纯技术架构与工程落地，系统性拆解基于 Java 21 + Spring Boot 3.5、Vue 3.5 与 AWS Bedrock 多模态视觉大模型的企业级 AI-OCR 智能体：从混合文档解析、视觉切片、Agent 自愈反思闭环，到 Resilience4j 防御性容错设计、前端 Canvas 坐标级双向联动与云原生 Fargate 部署。"
+part: 2
 summary: "深入剖析企业级多源异构文档处理管线的核心实现：设计原生电子层与位图光栅化的自适应混合分流路由，详解 300 DPI 渲染与倾斜矫正预处理，并重点推导 Dynamic High-Res Tiling（动态自适应切片与重叠窗）算法以突破大模型视觉分辨率与微小字符识别瓶颈。"
 ---
 

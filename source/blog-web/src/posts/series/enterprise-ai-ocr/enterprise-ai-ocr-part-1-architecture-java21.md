@@ -3,11 +3,7 @@ title: "企业级智能文档处理（IDP）全栈架构演进与 Java 21 异步
 date: "2026-08-30"
 tags: ["架构设计", "Java 21", "虚拟线程", "IDP", "Spring Boot 3"]
 slug: "enterprise-ai-ocr-part-1-architecture-java21"
-series:
-  name: "企业级多模态 AI-OCR 智能体与高性能全栈架构实战"
-  slug: "enterprise-ai-ocr-agent-architecture"
-  part: 1
-  description: "聚焦纯技术架构与工程落地，系统性拆解基于 Java 21 + Spring Boot 3.5、Vue 3.5 与 AWS Bedrock 多模态视觉大模型的企业级 AI-OCR 智能体：从混合文档解析、视觉切片、Agent 自愈反思闭环，到 Resilience4j 防御性容错设计、前端 Canvas 坐标级双向联动与云原生 Fargate 部署。"
+part: 1
 summary: "系统性剖析企业级智能文档处理（IDP）系统的代际架构演进（从传统规则坐标、深度学习版面分析到多模态 Vision Agent），并基于 Java 21 虚拟线程（Virtual Threads）与结构化并发构建高吞吐 I/O 异步底座，深度讲解 BaseDocumentController 模板方法抽象与文档生命周期状态机。"
 ---
 
