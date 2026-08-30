@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { BlogPostMeta, TagCount, SeriesMeta } from '@/types/post'
-import defaultPosts from 'virtual:blog-posts'
+import defaultPosts, { seriesList as defaultSeriesList } from 'virtual:blog-posts'
 
-// 动态载入所有 markdown 源码
-const markdownFiles = import.meta.glob('../posts/*.md', { query: '?raw', import: 'default' })
+// 动态载入所有根目录文章及专栏子目录 Markdown 源码
+const markdownFiles = import.meta.glob('../posts/**/*.md', { query: '?raw', import: 'default' })
 
 export const useBlogStore = defineStore('blog', () => {
   const posts = ref<BlogPostMeta[]>(defaultPosts || [])
+  const seriesList = ref<SeriesMeta[]>(defaultSeriesList || [])
   const activeTag = ref<string | null>(null)
   const contentCache = ref<Record<string, string>>({})
 
@@ -33,57 +34,6 @@ export const useBlogStore = defineStore('blog', () => {
   const filteredPosts = computed<BlogPostMeta[]>(() => {
     if (!activeTag.value) return posts.value
     return posts.value.filter((p) => p.tags && p.tags.includes(activeTag.value!))
-  })
-
-  // 计算专栏 / 系列合集列表
-  const seriesList = computed<SeriesMeta[]>(() => {
-    const map = new Map<string, SeriesMeta>()
-
-    for (const post of posts.value) {
-      if (!post.series?.slug || !post.series?.name) continue
-
-      const slug = post.series.slug
-      if (!map.has(slug)) {
-        map.set(slug, {
-          slug,
-          name: post.series.name,
-          description: post.series.description || '',
-          postsCount: 0,
-          posts: [],
-          tags: [],
-          updatedAt: post.date,
-        })
-      }
-
-      const series = map.get(slug)!
-      series.posts.push(post)
-      if (post.series.description && !series.description) {
-        series.description = post.series.description
-      }
-      if (post.date > series.updatedAt) {
-        series.updatedAt = post.date
-      }
-      // 聚合标签
-      for (const t of post.tags || []) {
-        if (!series.tags.includes(t)) {
-          series.tags.push(t)
-        }
-      }
-    }
-
-    const result = Array.from(map.values())
-    for (const item of result) {
-      item.postsCount = item.posts.length
-      // 按章节序号或日期排序（正序）
-      item.posts.sort((a, b) => {
-        const partA = a.series?.part ?? 999
-        const partB = b.series?.part ?? 999
-        if (partA !== partB) return partA - partB
-        return new Date(a.date).getTime() - new Date(b.date).getTime()
-      })
-    }
-
-    return result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
   })
 
   function getPostBySlug(slug: string): BlogPostMeta | undefined {
@@ -131,13 +81,12 @@ export const useBlogStore = defineStore('blog', () => {
       return contentCache.value[slug]
     }
 
-    // 寻找匹配文件
+    // 精确匹配文件名与 slug
     for (const [filePath, loader] of Object.entries(markdownFiles)) {
       const fileName = filePath.split('/').pop()?.replace('.md', '')
-      const post = posts.value.find((p) => p.slug === slug)
-      const targetMatch = post?.slug === slug && (fileName === slug || filePath.includes(slug))
+      const isExactMatch = fileName === slug || filePath.endsWith(`/${slug}.md`) || filePath.endsWith(`\\${slug}.md`)
 
-      if (targetMatch || fileName === slug) {
+      if (isExactMatch) {
         try {
           const raw = (await loader()) as string
           // 移除 frontmatter YAML 头

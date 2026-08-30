@@ -7,7 +7,8 @@ declare module '*.vue' {
 }
 
 declare module 'virtual:blog-posts' {
-  import type { BlogPostMeta } from '@/types/post'
+  import type { BlogPostMeta, SeriesMeta } from '@/types/post'
   export const posts: BlogPostMeta[]
+  export const seriesList: SeriesMeta[]
   export default posts
 }

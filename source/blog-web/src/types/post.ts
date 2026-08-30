@@ -16,10 +16,21 @@ export interface BlogPostMeta {
   series?: PostSeriesInfo
 }
 
+export interface SeriesConfig {
+  slug: string
+  name: string
+  description?: string
+  order?: number
+  cover?: string
+  tags?: string[]
+}
+
 export interface SeriesMeta {
   slug: string
   name: string
   description?: string
+  cover?: string
+  order?: number
   postsCount: number
   posts: BlogPostMeta[]
   tags: string[]

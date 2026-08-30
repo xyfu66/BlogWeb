@@ -1,0 +1,7 @@
+{
+  "slug": "android-basics",
+  "name": "浅谈安卓（Android）",
+  "description": "本系列为 Android 入门教程，从 Android 系统发展史与版本演进、系统四层体系架构与 Dalvik 虚拟机，到基于 Android Studio 创建首个 App、界面布局设计与 APK 签名打包，以及工程项目结构与核心组件详解。",
+  "order": 3,
+  "tags": ["Android", "安卓", "移动开发", "系统架构", "Dalvik"]
+}
