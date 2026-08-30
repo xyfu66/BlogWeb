@@ -23,14 +23,14 @@ summary: "深入剖析企业级多源异构文档处理管线的核心实现：�
 
 ```mermaid
 flowchart TD
-    RawFile["原始输入文档 (PDF / Word / TIFF / Image)"] --> MimeDetector["MIME 类型与格式嗅探 (Apache Tika)"]
+    RawFile["原始输入文档 (PDF / Word / TIFF / Image)"] --> MimeDetector["MIME 类型 & 格式嗅探 (Apache Tika)"]
     
-    MimeDetector -->|"DOCX / XLSX"| POIExtractor["Apache POI 抽取器 (结构化 XML/表格文本)"]
-    MimeDetector -->|"PDF 格式"| PDFInspector["PDFBox 电子图层探测器 (Text Layer Detector)"]
-    MimeDetector -->|"图像/扫描件"| ImagePreprocessor["图像预处理流水线 (300 DPI / 矫正)"]
+    MimeDetector -->|DOCX / XLSX| POIExtractor["Apache POI 抽取器 (结构化 XML/表格文本)"]
+    MimeDetector -->|PDF 格式| PDFInspector["PDFBox 电子图层探测器 (Text Layer Detector)"]
+    MimeDetector -->|图像/扫描件| ImagePreprocessor["图像预处理流水线 (300 DPI / 矫正)"]
     
-    PDFInspector -->|"文字图层覆盖率超过 85% 且规则规整"| DigitalStream["电子流 (Native Text Stream) → 直接走轻量 LLM"]
-    PDFInspector -->|"扫描件 / 含印章 / 复杂无界表格"| ImagePreprocessor
+    PDFInspector -->|文字图层覆盖率 > 85% & 规则规整| DigitalStream["电子流 (Native Text Stream) -> 直接走轻量 LLM"]
+    PDFInspector -->|扫描件 / 含印章 / 复杂无界表格| ImagePreprocessor
     
     ImagePreprocessor --> TilingEngine["Dynamic High-Res Tiling 切片引擎"]
     
@@ -158,8 +158,8 @@ public class PdfRasterizer {
 
 ```mermaid
 flowchart TD
-    Original["超高清原图 (例如: 3000 x 4200 px)"] --> Downsample["① 全局概览图 (Overview Downsample - 1024 x 1433 px)"]
-    Original --> TileGrid["② 自适应网格切片 (Tile Generator)"]
+    Original["超高清原图 (例如: 3000 x 4200 px)"] --> Downsample["1. 全局概览图 (Overview Downsample - 1024 x 1433 px)"]
+    Original --> TileGrid["2. 自适应网格切片 (Tile Generator)"]
     
     subgraph Grid["切片与 15% 重叠窗机制"]
         T1["切片 Tile (0,0)"]
@@ -169,8 +169,8 @@ flowchart TD
     end
     
     TileGrid --> Grid
-    Downsample & Grid --> CoordinateMap["③ 空间坐标映射表 (Affine Transform Matrix)"]
-    CoordinateMap --> FinalPayload["④ 组装多图多模态 Prompt (Global Context + High-Res Crops)"]
+    Downsample & Grid --> CoordinateMap["3. 空间坐标映射表 (Affine Transform Matrix)"]
+    CoordinateMap --> FinalPayload["4. 组装多图多模态 Prompt (Global Context + High-Res Crops)"]
 ```
 
 #### 算法核心要点：

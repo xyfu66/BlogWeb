@@ -23,14 +23,14 @@ summary: "全面复盘企业级 IDP 系统的生产级韧性架构与云原生�
 
 ```mermaid
 flowchart TD
-    Request["文档识别请求 (Java 21 虚拟线程)"] --> Bulkhead["① 隔离舱 (Bulkhead) - 限制最大并发调用数"]
-    Bulkhead --> RateLimiter["② 限流器 (RateLimiter) - 平滑请求削峰，匹配 Bedrock 配额"]
-    RateLimiter --> CircuitBreaker["③ 熔断器 (CircuitBreaker) - 监控错误率与慢调用，快速切断故障"]
-    CircuitBreaker --> Retry["④ 重试机制 (Retry with Exponential Backoff) - 指数退避重试"]
+    Request["文档识别请求 (Java 21 虚拟线程)"] --> Bulkhead["1. 隔离舱 (Bulkhead) - 限制最大并发调用数"]
+    Bulkhead --> RateLimiter["2. 限流器 (RateLimiter) - 平滑请求削峰，匹配 Bedrock 配额"]
+    RateLimiter --> CircuitBreaker["3. 熔断器 (CircuitBreaker) - 监控错误率与慢调用，快速切断故障"]
+    CircuitBreaker --> Retry["4. 重试机制 (Retry with Exponential Backoff) - 指数退避重试"]
     Retry --> BedrockAPI["AWS Bedrock (Claude 3.5 Sonnet)"]
     
-    CircuitBreaker -.->|"状态为 OPEN 触发熔断"| Fallback["优雅降级处理器 (Fallback)"]
-    Retry -.->|"重试耗尽仍然失败"| Fallback
+    CircuitBreaker -.->|状态为 OPEN 触发熔断| Fallback["优雅降级处理器 (Fallback)"]
+    Retry -.->|重试耗尽仍然失败| Fallback
     Fallback --> DLQ["存入异步延迟队列 / 标记待人工补录"]
 ```
 
@@ -199,33 +199,28 @@ Resources:
 通过本专栏共 6 篇体系化的技术长文，我们完整走过了企业级 AI-OCR 智能体的全生命周期：
 
 ```mermaid
-flowchart TD
-    Root["企业级多模态 AI-OCR 全栈体系"]
-
-    Root --> Base["底座与管线"]
-    Root --> Agent["智能体中枢"]
-    Root --> Trust["可信与自愈"]
-    Root --> Eng["全栈与工程化"]
-
-    Base --> B1["Java 21 虚拟线程与结构化并发"]
-    Base --> B2["BaseDocumentController 模板抽象"]
-    Base --> B3["混合分流路由 Hybrid Router"]
-    Base --> B4["300 DPI 渲染与 Dynamic High-Res Tiling"]
-
-    Agent --> A1["AWS Bedrock SDK v2 集成"]
-    Agent --> A2["Claude 3.5 视觉多模态抽取"]
-    Agent --> A3["Tool Calling JSON Schema 模式硬约束"]
-    Agent --> A4["防幻觉空间提示词工程"]
-
-    Trust --> T1["AOP 声明式业务一致性校验器"]
-    Trust --> T2["Agentic Reflection Loop 自我反思纠错回路"]
-    Trust --> T3["多维置信度量化评分模型"]
-
-    Eng --> E1["Vue 3.5 + Pinia 状态管理"]
-    Eng --> E2["pdfjs-dist Web Worker 离屏渲染与虚拟滚动"]
-    Eng --> E3["Canvas Bounding Box 空间坐标双向联动"]
-    Eng --> E4["Resilience4j 熔断/限流/重试/隔离舱防线"]
-    Eng --> E5["S3 预签名安全流转与 ECS Fargate IaC 交付"]
+mindmap
+  root((企业级多模态 AI-OCR 全栈体系))
+    底座与管线
+      Java 21 虚拟线程与结构化并发
+      BaseDocumentController 模板抽象
+      混合分流路由 (Hybrid Router)
+      300 DPI 渲染与 Dynamic High-Res Tiling
+    智能体中枢
+      AWS Bedrock SDK v2 集成
+      Claude 3.5 视觉多模态抽取
+      Tool Calling JSON Schema 模式硬约束
+      防幻觉空间提示词工程
+    可信与自愈
+      AOP 声明式业务一致性校验器
+      Agentic Reflection Loop 自我反思纠错回路
+      多维置信度量化评分模型
+    全栈与工程化
+      Vue 3.5 + Pinia 状态管理
+      pdfjs-dist Web Worker 离屏渲染与虚拟滚动
+      Canvas Bounding Box 空间坐标双向联动
+      Resilience4j 熔断/限流/重试/隔离舱防线
+      S3 预签名安全流转与 ECS Fargate IaC 交付
 ```
 
 这一套架构不仅攻克了文档自动化识别中的准确率与泛化性瓶颈，更展现了**将现代 Java 21 高性能后端、Vue 3.5 现代化前端与前沿生成式 AI 技术紧密结合的工程范式**。希望本专栏能为你的企业级智能文档系统架构设计提供坚实的参考与启发！
