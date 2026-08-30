@@ -9,7 +9,7 @@ summary: "全面复盘企业级 IDP 系统的生产级韧性架构与云原生�
 
 # 高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付
 
-在任何将生成式 AI（Generative AI）深度集成到核心业务流的系统中，外部大模型 API 都是最大的**“不确定性来源”**。
+在任何将生成式 AI（Generative AI）深度集成到核心业务流的系统中，外部大模型 API 都是最大的 **“不确定性来源”**。
 
 面对大模型 API 的**偶发性限流（HTTP 429 Too Many Requests）、推理超时抖动、上游服务降级（HTTP 503）**，如果后端直接裸调接口，瞬间的高并发流量极易引发级联故障（Cascading Failure），导致整个系统服务雪崩。
 

@@ -19,7 +19,7 @@ summary: "深入剖析基于 Vue 3.5、Pinia 与 Canvas 的企业级 IDP 交互�
 
 ## 1. 前端工作台核心架构设计
 
-工作台采用**“左右双屏同步、事件总线驱动、空间坐标映射”**的分层架构：
+工作台采用 **“左右双屏同步、事件总线驱动、空间坐标映射”** 的分层架构：
 
 ```mermaid
 flowchart LR
@@ -73,7 +73,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
 ## 3. 核心交互：空间坐标双向高亮（Bounding Box Mapping）
 
 ### 3.1 坐标规范与转换矩阵
-后文 AI 智能体返回的坐标为归一化坐标 `[ymin, xmin, ymax, xmax]`（取值 $0 \sim 1000$）。Canvas 需要根据当前 PDF 的**缩放比率（Scale）**与**设备像素比（DPR）**进行精准转换：
+后文 AI 智能体返回的坐标为归一化坐标 `[ymin, xmin, ymax, xmax]`（取值 $0 \sim 1000$）。Canvas 需要根据当前 PDF 的 **缩放比率（Scale）** 与 **设备像素比（DPR）** 进行精准转换：
 
 $$\begin{cases}
 X_{canvas} = \frac{xmin}{1000} \times \text{PageWidth} \times \text{Scale} \\
@@ -280,4 +280,4 @@ function handleCanvasClick(e: MouseEvent) {
 
 至此，核心业务流水线与交互系统已全部打通。但在生产环境中，如何应对 AWS Bedrock 限流、网络闪断，以及如何通过基础设施即代码（IaC）一键部署上线？
 
-在专栏收官篇**《高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付》**中，我们将完成最后的生产级高可用与云原生工程闭环！
+在专栏收官篇 **《高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付》** 中，我们将完成最后的生产级高可用与云原生工程闭环！
