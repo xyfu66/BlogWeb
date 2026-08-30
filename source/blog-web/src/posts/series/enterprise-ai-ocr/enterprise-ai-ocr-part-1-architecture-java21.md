@@ -92,7 +92,7 @@ flowchart TD
 
     subgraph StorageCloud["存储与基础设施 (AWS Cloud)"]
         S3["AWS S3 对象存储 (文档归档 / 预签名 URL)"]
-        DB[(MS SQL Server / JPA 持久化)]
+        DB[(AWS RDS PostgreSQL / JPA 持久化)]
         BedrockService["AWS Bedrock Runtime (Claude 3.5 Sonnet)"]
     end
 
