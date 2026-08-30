@@ -2,8 +2,8 @@
 title: "多源异构文档处理管线：从混合解析到视觉高动态切片（High-Res Tiling）"
 date: "2026-08-30"
 tags: ["PDFBox", "图像处理", "动态切片", "VLM", "文档管线"]
-slug: "enterprise-ai-ocr-part-2-document-pipeline-tiling"
-part: 2
+slug: "enterprise-ai-ocr-part-4-pipeline-tiling"
+part: 4
 summary: "深入剖析企业级多源异构文档处理管线的核心实现：设计原生电子层与位图光栅化的自适应混合分流路由，详解 300 DPI 渲染与倾斜矫正预处理，并重点推导 Dynamic High-Res Tiling（动态自适应切片与重叠窗）算法以突破大模型视觉分辨率与微小字符识别瓶颈。"
 ---
 
@@ -184,7 +184,6 @@ flowchart TD
 ```java
 package com.idp.engine.pipeline;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;

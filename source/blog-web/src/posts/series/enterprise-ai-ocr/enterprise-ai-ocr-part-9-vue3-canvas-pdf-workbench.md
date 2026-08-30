@@ -2,8 +2,8 @@
 title: "Vue 3.5 + Canvas 交互工作台：大文件 PDF 虚拟化渲染与坐标级双向标注联动"
 date: "2026-08-30"
 tags: ["Vue 3.5", "Vite", "Pinia", "Canvas", "pdfjs-dist", "前端性能"]
-slug: "enterprise-ai-ocr-part-5-vue3-canvas-pdf-workbench"
-part: 5
+slug: "enterprise-ai-ocr-part-9-vue3-canvas-pdf-workbench"
+part: 9
 summary: "深入剖析基于 Vue 3.5、Pinia 与 Canvas 的企业级 IDP 交互工作台实现：详解 pdfjs-dist + Web Worker 多线程离屏渲染与内存自动回收、超长大文件虚拟滚动（Virtual Scrolling），以及表单字段与 PDF 画布区域的空间坐标（Bounding Box）双向联动交互设计。"
 ---
 
@@ -146,7 +146,7 @@ H_{canvas} = \frac{ymax - ymin}{1000} \times \text{PageHeight} \times \text{Scal
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, useTemplateRef } from 'vue'
+import { ref, reactive, computed, useTemplateRef } from 'vue'
 
 interface BoundingBox {
   ymin: number
@@ -211,7 +211,7 @@ function highlightField(fieldKey: string) {
   const w = ((bbox.xmax - bbox.xmin) / 1000) * canvas.width
   const h = ((bbox.ymax - bbox.ymin) / 1000) * canvas.height
 
-  // 绘制半透明半发光高亮矩形 (Brand Blue #409EFF)
+  // 绘制半透明高亮矩形 (Brand Blue #409EFF)
   ctx.fillStyle = 'rgba(64, 158, 255, 0.25)'
   ctx.strokeStyle = '#409EFF'
   ctx.lineWidth = 2.5
@@ -280,4 +280,4 @@ function handleCanvasClick(e: MouseEvent) {
 
 至此，核心业务流水线与交互系统已全部打通。但在生产环境中，如何应对 AWS Bedrock 限流、网络闪断，以及如何通过基础设施即代码（IaC）一键部署上线？
 
-在专栏收官篇 **《高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付》** 中，我们将完成最后的生产级高可用与云原生工程闭环！
+在下一篇文章 **《高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付》** 中，我们将深入微服务韧性工程与自动化云原生部署！

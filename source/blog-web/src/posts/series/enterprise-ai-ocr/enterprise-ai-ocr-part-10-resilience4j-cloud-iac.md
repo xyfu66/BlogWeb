@@ -2,8 +2,8 @@
 title: "高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付"
 date: "2026-08-30"
 tags: ["Resilience4j", "高可用", "AWS Fargate", "CloudFormation", "DevOps"]
-slug: "enterprise-ai-ocr-part-6-resilience4j-cloud-iac"
-part: 6
+slug: "enterprise-ai-ocr-part-10-resilience4j-cloud-iac"
+part: 10
 summary: "全面复盘企业级 IDP 系统的生产级韧性架构与云原生部署交付：深入配置 Resilience4j 熔断器、限流器、重试与隔离舱组合防线以应对外部大模型 API 抖动，详解 S3 预签名 URL 安全分发，并给出基于 AWS CloudFormation (IaC) 与 ECS Fargate 的自动化部署实战。"
 ---
 
@@ -13,7 +13,7 @@ summary: "全面复盘企业级 IDP 系统的生产级韧性架构与云原生�
 
 面对大模型 API 的**偶发性限流（HTTP 429 Too Many Requests）、推理超时抖动、上游服务降级（HTTP 503）**，如果后端直接裸调接口，瞬间的高并发流量极易引发级联故障（Cascading Failure），导致整个系统服务雪崩。
 
-作为本专栏的收官篇，本文将深入生产高可用实战，解密如何利用 **Resilience4j** 构筑钢铁般的防御性防线，并通过 **AWS CloudFormation (IaC) + ECS Fargate** 完成云原生交付。
+本文将深入生产高可用实战，解密如何利用 **Resilience4j** 构筑钢铁般的防御性防线，并通过 **AWS CloudFormation (IaC) + ECS Fargate** 完成云原生交付。
 
 ---
 
@@ -194,33 +194,10 @@ Resources:
 
 ---
 
-## 5. 专栏全景复盘与架构路线回顾
+## 5. 小结与下篇预告
 
-通过本专栏共 6 篇体系化的技术长文，我们完整走过了企业级 AI-OCR 智能体的全生命周期：
+通过构筑 **Resilience4j 四重容错防线**、**S3 预签名零中转安全流转** 与 **AWS CloudFormation (IaC) + ECS Fargate** 自动化交付体系，系统获得了抵御外部 API 波动与支撑海量并发的生产级高可用底座。
 
-```mermaid
-mindmap
-  root((企业级多模态 AI-OCR 全栈体系))
-    底座与管线
-      Java 21 虚拟线程与结构化并发
-      BaseDocumentController 模板抽象
-      混合分流路由 (Hybrid Router)
-      300 DPI 渲染与 Dynamic High-Res Tiling
-    智能体中枢
-      AWS Bedrock SDK v2 集成
-      Claude 3.5 视觉多模态抽取
-      Tool Calling JSON Schema 模式硬约束
-      防幻觉空间提示词工程
-    可信与自愈
-      AOP 声明式业务一致性校验器
-      Agentic Reflection Loop 自我反思纠错回路
-      多维置信度量化评分模型
-    全栈与工程化
-      Vue 3.5 + Pinia 状态管理
-      pdfjs-dist Web Worker 离屏渲染与虚拟滚动
-      Canvas Bounding Box 空间坐标双向联动
-      Resilience4j 熔断/限流/重试/隔离舱防线
-      S3 预签名安全流转与 ECS Fargate IaC 交付
-```
+但系统上线后，我们如何客观、量化地评估每一个单据类型的提取质量？如何验证标准答案是否正确生成？证据片段是否命中？页码追溯是否精准？
 
-这一套架构不仅攻克了文档自动化识别中的准确率与泛化性瓶颈，更展现了**将现代 Java 21 高性能后端、Vue 3.5 现代化前端与前沿生成式 AI 技术紧密结合的工程范式**。希望本专栏能为你的企业级智能文档系统架构设计提供坚实的参考与启发！
+在专栏的收官之作 **《多维评测体系与质量基线：从标准集构建到 CI/CD 自动化 Benchmark》** 中，我们将揭秘工业级 IDP 系统的全方位自动化评测框架与全景技术路线复盘！
