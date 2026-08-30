@@ -355,6 +355,7 @@ onMounted(() => {
               <div
                 v-if="prevPost"
                 class="post-nav-card prev-card"
+                :title="prevPost.title"
                 @click="navigateToPost(prevPost)"
               >
                 <span class="nav-label">
@@ -367,6 +368,7 @@ onMounted(() => {
               <div
                 v-if="nextPost"
                 class="post-nav-card next-card"
+                :title="nextPost.title"
                 @click="navigateToPost(nextPost)"
               >
                 <span class="nav-label">
@@ -503,10 +505,14 @@ onMounted(() => {
   grid-template-columns: minmax(0, 1fr) 260px;
   gap: 2rem;
   align-items: start;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .post-article {
   padding: 2.5rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .article-header {
@@ -537,6 +543,8 @@ onMounted(() => {
   line-height: 1.3;
   margin-bottom: 1.25rem;
   letter-spacing: -0.02em;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .article-tags {
@@ -707,12 +715,16 @@ onMounted(() => {
   margin-top: 3.5rem;
   padding-top: 2rem;
   border-top: 1px solid var(--bl-border);
+  width: 100%;
+  min-width: 0;
 }
 
 .nav-prev-next {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .post-nav-card {
@@ -723,11 +735,21 @@ onMounted(() => {
   border: 1px solid var(--bl-border);
   border-radius: var(--bl-radius-md);
   transition: all var(--bl-dur-fast) var(--bl-ease);
+  cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .post-nav-card:hover {
   border-color: var(--bl-accent);
   background: var(--bl-surface-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--bl-shadow-glow);
+}
+
+.post-nav-placeholder {
+  min-width: 0;
 }
 
 .nav-label {
@@ -735,6 +757,7 @@ onMounted(() => {
   color: var(--bl-accent);
   margin-bottom: 0.35rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .nav-title {
@@ -744,6 +767,10 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  display: block;
+  line-height: 1.5;
 }
 
 .next-card {
@@ -811,7 +838,7 @@ onMounted(() => {
 
 @media (max-width: 900px) {
   .post-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .toc-sidebar {
@@ -827,7 +854,7 @@ onMounted(() => {
   }
 
   .nav-prev-next {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .next-card {
