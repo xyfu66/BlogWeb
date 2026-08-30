@@ -26,16 +26,16 @@ flowchart LR
     ExtractedJSON["大模型抽取的初版 JSON"] --> RuleValidator["业务一致性校验器 (Rule Engine)"]
     
     subgraph Rules["多维业务规则库"]
-        R1["1. 算术守恒: ∑明细金额 == 单据总金额"]
-        R2["2. 数量守恒: ∑明细件数 == 单据总件数"]
-        R3["3. 时间因果: 签发日期 <= 报关日期 <= 归档日期"]
-        R4["4. 编码校验: 统一社会信用代码 / 税号校验位算法"]
+        R1["① 算术守恒: ∑明细金额 等于 单据总金额"]
+        R2["② 数量守恒: ∑明细件数 等于 单据总件数"]
+        R3["③ 时间因果: 签发日期 ≤ 报关日期 ≤ 归档日期"]
+        R4["④ 编码校验: 统一社会信用代码 / 税号校验位算法"]
     end
     
     RuleValidator --> Rules
     Rules --> Result{"所有规则是否均通过？"}
-    Result -->|通过| Success["标记为 High Confidence"]
-    Result -->|未通过| ErrorDiagnostic["生成结构化诊断报告 (Diagnostic Report)"]
+    Result -->|"通过"| Success["标记为 High Confidence"]
+    Result -->|"未通过"| ErrorDiagnostic["生成结构化诊断报告 (Diagnostic Report)"]
 ```
 
 ### 1.1 校验器核心接口与诊断报告实现
@@ -210,10 +210,10 @@ $$Score_{final} = W_v \cdot C_{visual} + W_s \cdot C_{schema} + W_r \cdot (1 - P
 
 ```mermaid
 flowchart TD
-    FinalScore["计算综合置信度 Score (0.0 ~ 1.0)"] --> ScoreCheck{"Score >= 0.95 & 规则 100% 通过？"}
+    FinalScore["计算综合置信度 Score (0.0 ~ 1.0)"] --> ScoreCheck{"Score ≥ 0.95 且规则全部通过？"}
     
-    ScoreCheck -->|是 (约 92%~95% 正常件)| AutoArchive["全自动归档 (Direct Archive)"]
-    ScoreCheck -->|否 (约 5%~8% 模糊/冲突件)| HITLQueue["推入人工协同工作台 (Human-in-the-Loop)"]
+    ScoreCheck -->|"是 (约 92%~95% 正常件)"| AutoArchive["全自动归档 (Direct Archive)"]
+    ScoreCheck -->|"否 (约 5%~8% 模糊/冲突件)"| HITLQueue["推入人工协同工作台 (Human-in-the-Loop)"]
     
     HITLQueue --> Reviewer["审查员在 Vue 3 画布中校对高亮冲突字段"]
     Reviewer --> ManualConfirm["人工确认并放行"]

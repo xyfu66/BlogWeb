@@ -22,11 +22,29 @@ summary: "系统性剖析企业级智能文档处理（IDP）系统的代际架�
 理解技术演进的本质，有助于我们在技术选型时不盲目跟风，准确把握不同方案的工程边界。
 
 ```mermaid
-timeline
-    title 智能文档处理 (IDP) 架构演进全景
-    1.0 规则与几何坐标时代 (Rule-Based OCR) : Tesseract / ABBYY FineReader : 依赖绝对坐标与固定模板 : 模板稍变即崩溃，维护成本指数上升
-    2.0 深度学习与版面分析流水线 (Deep Learning) : DBNet + CRNN + LayoutLM v3 : 文本检测 + 实体识别序列标注 : 需大量标注微调，跨版面泛化能力有限
-    3.0 多模态视觉智能体时代 (Vision Agent) : Claude 3.5 Sonnet / Qwen2.5-VL + Schema 约束 : 视觉推理 + 规则自愈闭环 + 空间感知 : 零样本泛化，具备全局逻辑推断与自我纠错能力
+flowchart LR
+    subgraph Gen1["第一代 · 规则与几何坐标"]
+        direction TB
+        G1A["Tesseract / ABBYY FineReader"]
+        G1B["依赖绝对坐标与固定模板"]
+        G1C["模板稍变即崩溃，维护成本指数上升"]
+    end
+
+    subgraph Gen2["第二代 · 深度学习版面分析"]
+        direction TB
+        G2A["DBNet + CRNN + LayoutLM v3"]
+        G2B["文本检测 + 实体识别序列标注"]
+        G2C["需大量标注微调，跨版面泛化能力有限"]
+    end
+
+    subgraph Gen3["第三代 · 多模态视觉智能体"]
+        direction TB
+        G3A["Claude 3.5 Sonnet / Qwen2.5-VL + Schema 约束"]
+        G3B["视觉推理 + 规则自愈闭环 + 空间感知"]
+        G3C["零样本泛化，具备全局逻辑推断与自我纠错"]
+    end
+
+    Gen1 --> Gen2 --> Gen3
 ```
 
 ### 1.1 三代技术方案的核心特征与局限对比
@@ -106,8 +124,8 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph Traditional["传统平台线程 (1:1 映射操作系统内核线程)"]
-        T1["OS Thread 1"] -->|I/O 等待 (阻塞 3s)| Wait1["CPU 闲置但占用 1MB 内存"]
-        T2["OS Thread 2"] -->|I/O 等待 (阻塞 3s)| Wait2["CPU 闲置但占用 1MB 内存"]
+        T1["OS Thread 1"] -->|"I/O 等待 (阻塞 3s)"| Wait1["CPU 闲置但占用 1MB 内存"]
+        T2["OS Thread 2"] -->|"I/O 等待 (阻塞 3s)"| Wait2["CPU 闲置但占用 1MB 内存"]
     end
 
     subgraph VirtualThreads["Java 21 虚拟线程 (M:N 协程调度)"]
@@ -116,7 +134,7 @@ flowchart LR
         VT3["Virtual Thread N (百万级)"]
         Carrier["少量 Carrier 载体线程 (等于 CPU 核心数)"]
         
-        VT1 & VT2 & VT3 -.->|遇 I/O 自动卸载 (Unmount)| Carrier
+        VT1 & VT2 & VT3 -.->|"遇 I/O 自动卸载 (Unmount)"| Carrier
     end
 ```
 
@@ -197,9 +215,9 @@ stateDiagram-v2
     PREPROCESSING --> IN_INFERENCE : 组装 Payload 调用 Vision Agent
     IN_INFERENCE --> VALIDATING : 提取 JSON 完成，进入规则引擎
     
-    VALIDATING --> ARCHIVED : 校验通过 & 置信度 >= 0.95 (自动归档)
-    VALIDATING --> IN_INFERENCE : 校验失败 & 反思次数 < 3 (触发自愈)
-    VALIDATING --> NEEDS_REVIEW : 校验失败 / 置信度 < 0.95 (转人工复核)
+    VALIDATING --> ARCHIVED : 校验通过且置信度 ≥ 0.95 自动归档
+    VALIDATING --> IN_INFERENCE : 校验失败且反思次数 ＜ 3 触发自愈
+    VALIDATING --> NEEDS_REVIEW : 校验失败或置信度 ＜ 0.95 转人工复核
     
     NEEDS_REVIEW --> PREVIEWING : 审查员调阅 Vue 3 画布工作台
     PREVIEWING --> ARCHIVED : 审查员确认修改并放行
