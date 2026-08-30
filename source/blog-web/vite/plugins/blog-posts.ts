@@ -3,44 +3,14 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export interface PostSeriesInfo {
-  name: string
-  slug: string
-  part?: number
-  description?: string
-}
+import type {
+  BlogPostMeta,
+  PostSeriesInfo,
+  SeriesConfig,
+  SeriesMeta,
+} from '../../src/types/post.ts'
 
-export interface BlogPostMeta {
-  slug: string
-  title: string
-  date: string
-  tags: string[]
-  summary: string
-  readingTime: number
-  link?: string
-  series?: PostSeriesInfo
-}
-
-export interface SeriesConfig {
-  slug: string
-  name: string
-  description?: string
-  order?: number
-  cover?: string
-  tags?: string[]
-}
-
-export interface SeriesMeta {
-  slug: string
-  name: string
-  description?: string
-  cover?: string
-  order?: number
-  postsCount: number
-  posts: BlogPostMeta[]
-  tags: string[]
-  updatedAt: string
-}
+export type { BlogPostMeta, PostSeriesInfo, SeriesConfig, SeriesMeta }
 
 const VIRTUAL_MODULE_ID = 'virtual:blog-posts'
 const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
