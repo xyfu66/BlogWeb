@@ -549,9 +549,61 @@ onUnmounted(() => {
 }
 
 .lightbox-svg-container :deep(text),
-.lightbox-svg-container :deep(span),
-.lightbox-svg-container :deep(div) {
-  color: #f0f6fc;
+.lightbox-svg-container :deep(tspan) {
+  fill: #f0f6fc !important;
+  color: #f0f6fc !important;
+  font-family: var(--bl-font-sans, sans-serif) !important;
+}
+
+.lightbox-svg-container :deep(foreignObject),
+.lightbox-svg-container :deep(foreignObject div),
+.lightbox-svg-container :deep(foreignObject span),
+.lightbox-svg-container :deep(foreignObject p) {
+  color: #f0f6fc !important;
+  font-family: var(--bl-font-sans, sans-serif) !important;
+}
+
+.lightbox-svg-container :deep(.titleText) {
+  fill: #ffffff !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+}
+
+.lightbox-svg-container :deep(.sectionTitle) {
+  fill: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.lightbox-svg-container :deep(.taskText),
+.lightbox-svg-container :deep(.taskTextOutside),
+.lightbox-svg-container :deep(.eventText),
+.lightbox-svg-container :deep(.periodText) {
+  fill: #f0f6fc !important;
+  color: #f0f6fc !important;
+}
+
+.lightbox-svg-container :deep(rect.section) {
+  fill: #1f2937 !important;
+  stroke: #58a6ff !important;
+  stroke-width: 1.5px !important;
+}
+
+.lightbox-svg-container :deep(rect.task),
+.lightbox-svg-container :deep(rect.period) {
+  fill: #161b22 !important;
+  stroke: rgba(88, 166, 255, 0.4) !important;
+  stroke-width: 1px !important;
+}
+
+.lightbox-svg-container :deep(.timeline-axis),
+.lightbox-svg-container :deep(line.line) {
+  stroke: #58a6ff !important;
+  stroke-width: 1.5px !important;
+}
+
+.lightbox-svg-container :deep(circle.timeline-circle) {
+  fill: #58a6ff !important;
+  stroke: #388bfd !important;
 }
 
 /* Image rendering */

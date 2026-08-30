@@ -299,4 +299,103 @@
   transition: transform var(--bl-dur-fast) var(--bl-ease);
 }
 
+/* Force all SVG text and tspans to render with crisp, high-contrast white/light color */
+.mermaid-diagram svg text,
+.mermaid-diagram svg tspan {
+  fill: #f0f6fc !important;
+  font-family: var(--bl-font-sans) !important;
+}
+
+/* ForeignObject HTML text (Flowcharts, subgraphs, markdown labels) */
+.mermaid-diagram svg foreignObject,
+.mermaid-diagram svg foreignObject div,
+.mermaid-diagram svg foreignObject span,
+.mermaid-diagram svg foreignObject p {
+  color: #f0f6fc !important;
+  font-family: var(--bl-font-sans) !important;
+}
+
+/* Timeline Specific Aesthetics & High-Contrast Typography */
+.mermaid-diagram svg .titleText {
+  fill: #ffffff !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.mermaid-diagram svg .sectionTitle {
+  fill: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.mermaid-diagram svg .taskText,
+.mermaid-diagram svg .taskTextOutside,
+.mermaid-diagram svg .eventText,
+.mermaid-diagram svg .periodText {
+  fill: #f0f6fc !important;
+  color: #f0f6fc !important;
+}
+
+.mermaid-diagram svg rect.section {
+  fill: #1f2937 !important;
+  stroke: #58a6ff !important;
+  stroke-width: 1.5px !important;
+}
+
+.mermaid-diagram svg rect.task,
+.mermaid-diagram svg rect.period {
+  fill: #161b22 !important;
+  stroke: rgba(88, 166, 255, 0.4) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid-diagram svg .timeline-axis,
+.mermaid-diagram svg line.line {
+  stroke: #58a6ff !important;
+  stroke-width: 1.5px !important;
+}
+
+.mermaid-diagram svg circle.timeline-circle {
+  fill: #58a6ff !important;
+  stroke: #388bfd !important;
+}
+
+/* Sequence & Flowchart Deep Overrides */
+.mermaid-diagram svg .actor,
+.mermaid-diagram svg .actor-top,
+.mermaid-diagram svg .actor-bottom {
+  fill: #161b22 !important;
+  stroke: #58a6ff !important;
+}
+
+.mermaid-diagram svg .actor text,
+.mermaid-diagram svg .actor tspan {
+  fill: #ffffff !important;
+}
+
+.mermaid-diagram svg .messageText {
+  fill: #f0f6fc !important;
+  stroke: none !important;
+}
+
+.mermaid-diagram svg .note {
+  fill: #161b22 !important;
+  stroke: #bc8cff !important;
+}
+
+.mermaid-diagram svg .noteText {
+  fill: #f0f6fc !important;
+}
+
+.mermaid-diagram svg .loopText {
+  fill: #bc8cff !important;
+}
+
+.mermaid-diagram svg .label text,
+.mermaid-diagram svg .node text,
+.mermaid-diagram svg .edgeLabel text {
+  fill: #f0f6fc !important;
+}
+
+
 
