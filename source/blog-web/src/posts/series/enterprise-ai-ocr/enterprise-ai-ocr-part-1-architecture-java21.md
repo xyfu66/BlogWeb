@@ -22,11 +22,23 @@ summary: "系统性剖析企业级智能文档处理（IDP）系统的代际架�
 理解技术演进的本质，有助于我们在技术选型时不盲目跟风，准确把握不同方案的工程边界。
 
 ```mermaid
-timeline
-    title 智能文档处理 (IDP) 架构演进全景
-    1.0 规则与几何坐标时代 (Rule-Based OCR) : Tesseract / ABBYY FineReader : 依赖绝对坐标与固定模板 : 模板稍变即崩溃，维护成本指数上升
-    2.0 深度学习与版面分析流水线 (Deep Learning) : DBNet + CRNN + LayoutLM v3 : 文本检测 + 实体识别序列标注 : 需大量标注微调，跨版面泛化能力有限
-    3.0 多模态视觉智能体时代 (Vision Agent) : Claude 3.5 Sonnet / Qwen2.5-VL + Schema 约束 : 视觉推理 + 规则自愈闭环 + 空间感知 : 零样本泛化，具备全局逻辑推断与自我纠错能力
+flowchart LR
+    classDef stage1 fill:#161b22,stroke:#58a6ff,stroke-width:1.5px,color:#f0f6fc;
+    classDef stage2 fill:#1a1e2e,stroke:#bc8cff,stroke-width:1.5px,color:#f0f6fc;
+    classDef stage3 fill:#132d21,stroke:#3fb950,stroke-width:2px,color:#f0f6fc;
+
+    subgraph Panorama["智能文档处理 (IDP) 架构演进全景"]
+        direction LR
+        
+        G1["<b>1.0 规则与几何坐标时代</b><br/><i>(Rule-Based OCR)</i><br/>────────────────────<br/>🛠️ <b>代表技术：</b>Tesseract / ABBYY<br/>⚙️ <b>核心机制：</b>依赖绝对坐标与固定模板<br/>⚠️ <b>架构瓶颈：</b>模板微变即失效，规则膨胀"]:::stage1
+        
+        G2["<b>2.0 深度学习流水线</b><br/><i>(Deep Learning Pipeline)</i><br/>────────────────────<br/>🛠️ <b>代表技术：</b>DBNet + LayoutLM v3<br/>⚙️ <b>核心机制：</b>级联检测 + 实体序列标注<br/>⚠️ <b>架构瓶颈：</b>需海量标注微调，泛化弱"]:::stage2
+        
+        G3["<b>3.0 多模态视觉智能体</b><br/><i>(Vision Agent · 本项目架构)</i><br/>────────────────────<br/>🛠️ <b>代表技术：</b>Claude 3.5 / Qwen2.5-VL<br/>⚙️ <b>核心机制：</b>视觉推理 + 规则自愈闭环<br/>✨ <b>代际突破：</b>零样本泛化，具备推断与纠错"]:::stage3
+
+        G1 ==>|代际跃迁：深度特征学习| G2
+        G2 ==>|范式转移：多模态端到端推理| G3
+    end
 ```
 
 ### 1.1 三代技术方案的核心特征与局限对比
