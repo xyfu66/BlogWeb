@@ -48,7 +48,7 @@ flowchart TD
         J2["Cell(row=1, col=4): 固定资产 = ¥4,800.00 (单位: 万元, 币种: RMB, 年度: 2025)"]
     end
 
-    RawTable ==>|语义层级展开与上下文属性传播| StandardJSON
+    RawTable == "语义层级展开与上下文属性传播" ==> StandardJSON
 ```
 
 ### 1.1 表格单元格标准化模型设计
@@ -151,9 +151,9 @@ public class TableSemanticContextPropagator {
 flowchart TD
     FigureCrop["版面分析截取的图像区域 (Figure Crop)"] --> Classifier{"视觉元素分类器"}
     
-    Classifier -->|统计图表 (柱状/折线/饼图)| ChartExtractor["图表数据拟合器 (趋势分析 & 数据点还原)"]
-    Classifier -->|流程图 / 架构图| GraphExtractor["拓扑与实体关系抽取 (节点 -> 连线 -> 动作)"]
-    Classifier -->|示意截图 / 复杂实物图| CaptionAgent["视觉描述 Agent (Captioning & MetaData 标注)"]
+    Classifier -- "统计图表 (柱状/折线/饼图)" --> ChartExtractor["图表数据拟合器 (趋势分析 & 数据点还原)"]
+    Classifier -- "流程图 / 架构图" --> GraphExtractor["拓扑与实体关系抽取 (节点 -> 连线 -> 动作)"]
+    Classifier -- "示意截图 / 复杂实物图" --> CaptionAgent["视觉描述 Agent (Captioning & MetaData 标注)"]
     
     ChartExtractor & GraphExtractor & CaptionAgent --> FigureMeta["组装为 FigureMetaData 挂载至文档主干树"]
 ```

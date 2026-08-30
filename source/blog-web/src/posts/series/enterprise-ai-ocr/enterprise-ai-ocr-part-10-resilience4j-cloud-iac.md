@@ -29,8 +29,8 @@ flowchart TD
     CircuitBreaker --> Retry["4. 重试机制 (Retry with Exponential Backoff) - 指数退避重试"]
     Retry --> BedrockAPI["AWS Bedrock (Claude 3.5 Sonnet)"]
     
-    CircuitBreaker -.->|状态为 OPEN 触发熔断| Fallback["优雅降级处理器 (Fallback)"]
-    Retry -.->|重试耗尽仍然失败| Fallback
+    CircuitBreaker -. "状态为 OPEN 触发熔断" .-> Fallback["优雅降级处理器 (Fallback)"]
+    Retry -. "重试耗尽仍然失败" .-> Fallback
     Fallback --> DLQ["存入异步延迟队列 / 标记待人工补录"]
 ```
 

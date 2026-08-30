@@ -36,8 +36,8 @@ flowchart LR
         
         G3["<b>3.0 多模态视觉智能体</b><br/><i>(Vision Agent · 本项目架构)</i><br/>────────────────────<br/>🛠️ <b>代表技术：</b>Claude 3.5 / Qwen2.5-VL<br/>⚙️ <b>核心机制：</b>视觉推理 + 规则自愈闭环<br/>✨ <b>代际突破：</b>零样本泛化，具备推断与纠错"]:::stage3
 
-        G1 ==>|代际跃迁：深度特征学习| G2
-        G2 ==>|范式转移：多模态端到端推理| G3
+        G1 == "代际跃迁：深度特征学习" ==> G2
+        G2 == "范式转移：多模态端到端推理" ==> G3
     end
 ```
 
@@ -118,8 +118,8 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph Traditional["传统平台线程 (1:1 映射操作系统内核线程)"]
-        T1["OS Thread 1"] -->|I/O 等待 (阻塞 3s)| Wait1["CPU 闲置但占用 1MB 内存"]
-        T2["OS Thread 2"] -->|I/O 等待 (阻塞 3s)| Wait2["CPU 闲置但占用 1MB 内存"]
+        T1["OS Thread 1"] -- "I/O 等待 (阻塞 3s)" --> W1["CPU 闲置但占用 1MB 内存"]
+        T2["OS Thread 2"] -- "I/O 等待 (阻塞 3s)" --> W2["CPU 闲置但占用 1MB 内存"]
     end
 
     subgraph VirtualThreads["Java 21 虚拟线程 (M:N 协程调度)"]
@@ -128,7 +128,7 @@ flowchart LR
         VT3["Virtual Thread N (百万级)"]
         Carrier["少量 Carrier 载体线程 (等于 CPU 核心数)"]
         
-        VT1 & VT2 & VT3 -.->|遇 I/O 自动卸载 (Unmount)| Carrier
+        VT1 & VT2 & VT3 -. "遇 I/O 自动卸载 (Unmount)" .-> Carrier
     end
 ```
 

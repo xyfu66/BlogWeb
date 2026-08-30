@@ -49,8 +49,8 @@ flowchart LR
     RawSample --> AnnotatorB["审查员 B 独立标注 (结构化 JSON + BBox)"]
     
     AnnotatorA & AnnotatorB --> CrossCheck{"双盲结果交叉比对"}
-    CrossCheck -->|完全一致| GoldenDB[("入库黄金评测基准库 (Golden Dataset)")]
-    CrossCheck -->|存在分歧| ExpertReview["资深业务专家仲裁并固化标准答案"]
+    CrossCheck -- "完全一致" --> GoldenDB[("入库黄金评测基准库 (Golden Dataset)")]
+    CrossCheck -- "存在分歧" --> ExpertReview["资深业务专家仲裁并固化标准答案"]
     ExpertReview --> GoldenDB
 ```
 
@@ -151,8 +151,8 @@ flowchart TD
     
     RunBenchmark --> MetricsCheck{"指标是否满足质量红线？<br/>• EM >= 95%<br/>• Table F1 >= 0.92<br/>• 算术一致性 >= 98%"}
     
-    MetricsCheck -->|满足基线 & 无性能退化| PassDeploy["✅ 自动发布至生产预发环境 (ECS Staging)"]
-    MetricsCheck -->|未满足或产生回归 Bug| BlockAlert["❌ 阻断发布并输出差异化对比报告 (Diff Diagnostic)"]
+    MetricsCheck -- "满足基线 & 无性能退化" --> PassDeploy["✅ 自动发布至生产预发环境 (ECS Staging)"]
+    MetricsCheck -- "未满足或产生回归 Bug" --> BlockAlert["❌ 阻断发布并输出差异化对比报告 (Diff Diagnostic)"]
 ```
 
 ---

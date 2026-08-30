@@ -34,8 +34,8 @@ flowchart LR
     
     RuleValidator --> Rules
     Rules --> Result{"所有规则是否均通过？"}
-    Result -->|通过| Success["标记为 High Confidence"]
-    Result -->|未通过| ErrorDiagnostic["生成结构化诊断报告 (Diagnostic Report)"]
+    Result -- "通过" --> Success["标记为 High Confidence"]
+    Result -- "未通过" --> ErrorDiagnostic["生成结构化诊断报告 (Diagnostic Report)"]
 ```
 
 ### 1.1 校验器核心接口与诊断报告实现
@@ -212,8 +212,8 @@ $$Score_{final} = W_v \cdot C_{visual} + W_s \cdot C_{schema} + W_r \cdot (1 - P
 flowchart TD
     FinalScore["计算综合置信度 Score (0.0 ~ 1.0)"] --> ScoreCheck{"Score >= 0.95 & 规则 100% 通过？"}
     
-    ScoreCheck -->|是 (约 92%~95% 正常件)| AutoArchive["全自动归档 (Direct Archive)"]
-    ScoreCheck -->|否 (约 5%~8% 模糊/冲突件)| HITLQueue["推入人工协同工作台 (Human-in-the-Loop)"]
+    ScoreCheck -- "是 (约 92%~95% 正常件)" --> AutoArchive["全自动归档 (Direct Archive)"]
+    ScoreCheck -- "否 (约 5%~8% 模糊/冲突件)" --> HITLQueue["推入人工协同工作台 (Human-in-the-Loop)"]
     
     HITLQueue --> Reviewer["审查员在 Vue 3 画布中校对高亮冲突字段"]
     Reviewer --> ManualConfirm["人工确认并放行"]

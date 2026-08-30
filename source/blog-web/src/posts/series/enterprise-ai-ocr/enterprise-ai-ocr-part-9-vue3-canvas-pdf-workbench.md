@@ -41,10 +41,10 @@ flowchart LR
         DiffBar["AI 提取值 vs 人工修改值对比栏"]
     end
 
-    FormFields -->|1. 用户聚焦输入框| ActiveField
-    ActiveField -->|2. 触发空间变换与平滑滚动| OverlayCanvas
-    OverlayCanvas -->|3. 画布点击文字块| ActiveField
-    ActiveField -->|4. 自动聚焦右侧对应字段| FormFields
+    FormFields -- "1. 用户聚焦输入框" --> ActiveField
+    ActiveField -- "2. 触发空间变换与平滑滚动" --> OverlayCanvas
+    OverlayCanvas -- "3. 画布点击文字块" --> ActiveField
+    ActiveField -- "4. 自动聚焦右侧对应字段" --> FormFields
 ```
 
 ---

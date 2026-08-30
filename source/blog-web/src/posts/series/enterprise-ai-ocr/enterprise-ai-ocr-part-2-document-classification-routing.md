@@ -55,11 +55,11 @@ flowchart LR
 flowchart TD
     RawDoc["原始输入文档 (PDF)"] --> FastProbe["1. 快速文本指纹探测器 (Text Fingerprint Matcher)"]
     
-    FastProbe -->|"命中已知模板指纹 (置信度 &ge; 0.92)"| TemplatedMatch["确认为定型文档，提取 Template ID"]
-    FastProbe -->|文本指纹未命中或扫描件无文字层| VisualProbe["2. 轻量版面拓扑探测器 (Layout Topology Matcher)"]
+    FastProbe -- ""命中已知模板指纹 (置信度 &ge; 0.92)"" --> TemplatedMatch["确认为定型文档，提取 Template ID"]
+    FastProbe -- "文本指纹未命中或扫描件无文字层" --> VisualProbe["2. 轻量版面拓扑探测器 (Layout Topology Matcher)"]
     
-    VisualProbe -->|关键视觉锚点匹配成功| TemplatedMatch
-    VisualProbe -->|无匹配模板| UnstructuredMatch["标记为非定型文档 (Generic Unstructured)"]
+    VisualProbe -- "关键视觉锚点匹配成功" --> TemplatedMatch
+    VisualProbe -- "无匹配模板" --> UnstructuredMatch["标记为非定型文档 (Generic Unstructured)"]
     
     TemplatedMatch --> Router["文档工作流路由器 (Document Workflow Router)"]
     UnstructuredMatch --> Router
@@ -227,8 +227,8 @@ flowchart LR
         direction TB
         Classify["分类决策"]
         
-        Classify -->|定型文档| TBranch["注入定型模板 Context:<br/>• 专属字段定位提示<br/>• 字段几何区域约束<br/>• 模板定制 JSON Schema"]
-        Classify -->|非定型文档| UBranch["注入通用泛化 Context:<br/>• 开放式视觉空间理解<br/>• 关联推导防幻觉准则<br/>• 领域通用 JSON Schema"]
+        Classify -- "定型文档" --> TBranch["注入定型模板 Context:<br/>• 专属字段定位提示<br/>• 字段几何区域约束<br/>• 模板定制 JSON Schema"]
+        Classify -- "非定型文档" --> UBranch["注入通用泛化 Context:<br/>• 开放式视觉空间理解<br/>• 关联推导防幻觉准则<br/>• 领域通用 JSON Schema"]
     end
 ```
 
