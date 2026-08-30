@@ -45,10 +45,10 @@ const techSkills = [
         <div class="header-inner">
           <div class="profile-avatar">
             <div class="avatar-glow"></div>
-            <div class="avatar-text">BV</div>
+            <div class="avatar-text">BV (BitVortex Tech)</div>
           </div>
           <div class="profile-heading">
-            <h1 class="profile-name">BitVortex Tech</h1>
+            <h1 class="profile-name">刘祎锦</h1>
             <p class="profile-tagline">全栈架构师 & 算法工程师</p>
           </div>
         </div>
