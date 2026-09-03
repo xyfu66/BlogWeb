@@ -2,6 +2,14 @@
   "slug": "enterprise-ai-ocr-agent-architecture",
   "name": "企业级多模态 AI-OCR 智能体与高性能全栈架构实战",
   "description": "聚焦纯技术架构与工程落地，系统性拆解企业级 AI-OCR 智能体：从定型/非定型分类路由、深度版面解析、高动态切片，到 AWS Bedrock 结构化抽取、复杂表格与多模态图片处理、上下文窗口管理、Agent 自愈反思闭环，再到 Vue 3.5 Canvas 双向联动工作台、Resilience4j 防御性容错与多维质量评测体系。",
-  "order": 1,
-  "tags": ["架构设计", "Java 21", "IDP", "Spring Boot 3", "AI Agent", "多模态大模型", "Vue 3.5"]
+  "order": 4,
+  "tags": [
+    "架构设计",
+    "Java 21",
+    "IDP",
+    "Spring Boot 3",
+    "AI Agent",
+    "多模态大模型",
+    "Vue 3.5"
+  ]
 }

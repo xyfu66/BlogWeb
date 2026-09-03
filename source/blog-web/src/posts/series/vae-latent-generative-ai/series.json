@@ -2,6 +2,15 @@
   "slug": "vae-latent-generative-ai",
   "name": "潜空间引力场：从通俗直觉到时空因果的 VAE 全景拆解",
   "description": "拒绝枯燥黑话，聚焦现代 AI 生图（Stable Diffusion、Flux.1）与生视频（Sora、Wan 2.1、Cosmos）领域，系统拆解潜空间底座 VAE：从小白趣味通识、数学直觉与手撕代码，到 16 通道革命与 3D 因果时空架构。",
-  "order": 2,
-  "tags": ["VAE", "潜空间", "Stable Diffusion", "Flux", "Sora", "Wan 2.1", "深度学习", "生视频"]
+  "order": 5,
+  "tags": [
+    "VAE",
+    "潜空间",
+    "Stable Diffusion",
+    "Flux",
+    "Sora",
+    "Wan 2.1",
+    "深度学习",
+    "生视频"
+  ]
 }

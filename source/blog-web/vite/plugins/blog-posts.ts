@@ -336,11 +336,19 @@ export function loadBlogData(postsDir: string): { posts: BlogPostMeta[]; seriesL
     }
   }
 
-  // 专栏排序：order 升序 -> updatedAt 降序
+  // 专栏排序：order 降序（order 越大越靠前，未设定的排最后） -> updatedAt 降序
   const seriesList = Array.from(seriesMap.values()).sort((a, b) => {
-    const orderA = a.order ?? 999
-    const orderB = b.order ?? 999
-    if (orderA !== orderB) return orderA - orderB
+    const hasOrderA = a.order !== undefined && a.order !== null
+    const hasOrderB = b.order !== undefined && b.order !== null
+    if (hasOrderA && hasOrderB) {
+      if (a.order !== b.order) {
+        return (b.order as number) - (a.order as number)
+      }
+    } else if (hasOrderA) {
+      return -1
+    } else if (hasOrderB) {
+      return 1
+    }
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   })
 
