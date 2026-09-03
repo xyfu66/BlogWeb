@@ -1,5 +1,5 @@
 ---
-title: "AI画画的“脱水蔬菜与高斯魔法箱”：三分钟看懂为什么 Stable Diffusion 和 Sora 离不开 VAE"
+title: "VAE 全景拆解 #1：AI画画的“脱水蔬菜与高斯魔法箱”"
 date: "2026-09-01"
 tags: ["VAE", "Stable Diffusion", "AI绘画", "通俗科普", "潜空间"]
 slug: "vae-part-1-intuitive-guide"
@@ -7,7 +7,7 @@ part: 1
 summary: "拒绝数学黑话与枯燥堆砌！零门槛带你看懂为什么现代 AI 生图（Stable Diffusion、Flux）和生视频（Sora、Wan 2.1）必须依赖潜空间底座 VAE。"
 ---
 
-# AI画画的“脱水蔬菜与高斯魔法箱”：三分钟看懂为什么 Stable Diffusion 和 Sora 离不开 VAE
+# VAE 全景拆解 #1：AI画画的"脱水蔬菜与高斯魔法箱"
 
 不知道你有没有过这种奇妙的经历：
 

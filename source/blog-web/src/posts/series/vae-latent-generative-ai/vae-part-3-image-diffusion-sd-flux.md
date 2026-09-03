@@ -1,5 +1,5 @@
 ---
-title: "潜空间通道革命：从 SD 1.5 到 Flux.1，VAE 是如何主宰现代生图画质上限的？"
+title: "VAE 全景拆解 #3：潜空间通道革命"
 date: "2026-09-02"
 tags: ["Stable Diffusion", "Flux", "SDXL", "VAE", "潜空间", "AIGC", "工程优化"]
 slug: "vae-part-3-image-diffusion-sd-flux"
@@ -7,7 +7,7 @@ part: 3
 summary: "深入现代工业级图像生成的最前线：全景剖析 LDM 两阶段压缩范式与 f=8 黄金分割点；彻底解密 SD 1.5 中神秘系数 0.18215 的方差归一化数学真相；对比传统 4 通道在微距人脸与排版字体上的崩塌，拆解 Flux.1 与 SD3 跃迁至 16 通道潜空间的画质飞跃；详解 4K 显存救星 Spatial Tiling（贴瓷砖羽化融合）实战机制。"
 ---
 
-# 潜空间通道革命：从 SD 1.5 到 Flux.1，VAE 是如何主宰现代生图画质上限的？
+# VAE 全景拆解 #3：潜空间通道革命
 
 在当今的开源文生图领域，所有人都在狂热地讨论 DiT（Diffusion Transformer）架构、讨论 12B/14B 的超大参数量、讨论各种炫酷的 LoRA 微调。
 

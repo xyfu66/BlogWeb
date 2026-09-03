@@ -1,5 +1,5 @@
 ---
-title: "基于 AWS Bedrock (Claude 3.5) 的视觉 AI-OCR 智能体：结构化抽取与防幻觉设计"
+title: "企业级 AI-OCR #5：基于 AWS Bedrock 的视觉智能体与结构化抽取"
 date: "2026-08-30"
 tags: ["AWS Bedrock", "Claude 3.5", "Prompt工程", "结构化输出", "AI Agent"]
 slug: "enterprise-ai-ocr-part-5-bedrock-vlm-extraction"
@@ -7,7 +7,7 @@ part: 5
 summary: "深入拆解基于 AWS Bedrock (Claude 3.5 Sonnet) 的生产级多模态 AI-OCR 智能体中枢实现：包含 AWS SDK v2 异步集成、Tool Calling / JSON Schema 硬约束生成以及防幻觉空间提示词工程（Prompt Engineering）体系设计。"
 ---
 
-# 基于 AWS Bedrock (Claude 3.5) 的视觉 AI-OCR 智能体：结构化抽取与防幻觉设计
+# 企业级 AI-OCR #5：基于 AWS Bedrock 的视觉智能体与结构化抽取
 
 在将异构文档标准化为图像或文本切片后，核心任务便落在了 **“智能体大脑”** 上：如何让多模态大模型准确理解复杂的排版、嵌套字段、手写签名与印章，并 **100% 稳定输出符合业务系统强类型契约的结构化 JSON**？
 

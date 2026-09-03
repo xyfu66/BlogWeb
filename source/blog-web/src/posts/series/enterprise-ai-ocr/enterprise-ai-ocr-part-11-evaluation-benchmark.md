@@ -1,5 +1,5 @@
 ---
-title: "多维评测体系与质量基线：从标准集构建到 CI/CD 自动化 Benchmark"
+title: "企业级 AI-OCR #11：多维评测体系与 CI/CD 自动化 Benchmark"
 date: "2026-08-30"
 tags: ["评测体系", "Benchmark", "质量门禁", "JUnit 5", "CI/CD"]
 slug: "enterprise-ai-ocr-part-11-evaluation-benchmark"
@@ -7,7 +7,7 @@ part: 11
 summary: "全面解密企业级 IDP 系统的多维度质量评测体系与自动化 Benchmark 框架：设计标准基准数据集（Ground Truth）构建规范，深入拆解字段级准确率、证据片段命中、页码追溯精度、表格解析 F1 及计算格式化一致性五大核心评估指标，并基于 Java 21 + JUnit 5 实现 CI/CD 质量门禁与全专栏架构复盘。"
 ---
 
-# 多维评测体系与质量基线：从标准集构建到 CI/CD 自动化 Benchmark
+# 企业级 AI-OCR #11：多维评测体系与 CI/CD 自动化 Benchmark
 
 在企业级 AI 系统中，**“无法量化，就无法优化”**。
 

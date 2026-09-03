@@ -1,5 +1,5 @@
 ---
-title: "Agentic 校验闭环：可信规则引擎、自我反思纠错（Self-Correction）与置信度量化"
+title: "企业级 AI-OCR #8：Agentic 校验闭环与自我反思纠错"
 date: "2026-08-30"
 tags: ["AI Agent", "自我反思", "规则引擎", "HITL", "可信AI"]
 slug: "enterprise-ai-ocr-part-8-agentic-reflection-validation"
@@ -7,7 +7,7 @@ part: 8
 summary: "系统性解构多模态 AI-OCR 智能体的可信自愈中枢：设计基于 Spring AOP 的声明式业务一致性校验器，构建带错误堆栈反馈与局部视觉放大的 Agentic Reflection Loop（自我反思纠错回路），并提出多维置信度量化模型与人机协同（HITL）分流机制。"
 ---
 
-# Agentic 校验闭环：可信规则引擎、自我反思纠错（Self-Correction）与置信度量化
+# 企业级 AI-OCR #8：Agentic 校验闭环与自我反思纠错
 
 在传统 OCR 或简单的“Prompt 一次性抽取”方案中，一旦遇到图像反光、字体粘连或印章遮挡，模型极易产生微小识别偏差（例如将金额 `¥48,000` 识别为 `¥43,000`）。如果缺乏后置纠正机制，这一错误就会直接污染下游核心业务数据库。
 

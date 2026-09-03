@@ -1,5 +1,5 @@
 ---
-title: "企业级智能文档处理（IDP）全栈架构演进与 Java 21 异步性能底座"
+title: "企业级 AI-OCR #1：企业级智能文档处理架构演进与 Java 21 异步底座"
 date: "2026-08-30"
 tags: ["架构设计", "Java 21", "虚拟线程", "IDP", "Spring Boot 3"]
 slug: "enterprise-ai-ocr-part-1-architecture-java21"
@@ -7,7 +7,7 @@ part: 1
 summary: "系统性剖析企业级智能文档处理（IDP）系统的代际架构演进（从传统规则坐标、深度学习版面分析到多模态 Vision Agent），并基于 Java 21 虚拟线程（Virtual Threads）与结构化并发构建高吞吐 I/O 异步底座，深度讲解 BaseDocumentController 模板方法抽象与文档生命周期状态机。"
 ---
 
-# 企业级智能文档处理（IDP）全栈架构演进与 Java 21 异步性能底座
+# 企业级 AI-OCR #1：企业级智能文档处理架构演进与 Java 21 异步底座
 
 在现代企业级信息化与数字化转型中，**非结构化/半结构化文档（PDF、扫描单据、合同、发票、检验报告）的自动化提取与归档**一直是核心瓶颈。据统计，企业超过 80% 的关键数据沉淀在非结构化文档中。
 

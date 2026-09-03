@@ -1,5 +1,5 @@
 ---
-title: "Vue 3.5 + Canvas 交互工作台：大文件 PDF 虚拟化渲染与坐标级双向标注联动"
+title: "企业级 AI-OCR #9：Vue 3.5 + Canvas 交互工作台"
 date: "2026-08-30"
 tags: ["Vue 3.5", "Vite", "Pinia", "Canvas", "pdfjs-dist", "前端性能"]
 slug: "enterprise-ai-ocr-part-9-vue3-canvas-pdf-workbench"
@@ -7,7 +7,7 @@ part: 9
 summary: "深入剖析基于 Vue 3.5、Pinia 与 Canvas 的企业级 IDP 交互工作台实现：详解 pdfjs-dist + Web Worker 多线程离屏渲染与内存自动回收、超长大文件虚拟滚动（Virtual Scrolling），以及表单字段与 PDF 画布区域的空间坐标（Bounding Box）双向联动交互设计。"
 ---
 
-# Vue 3.5 + Canvas 交互工作台：大文件 PDF 虚拟化渲染与坐标级双向标注联动
+# 企业级 AI-OCR #9：Vue 3.5 + Canvas 交互工作台
 
 在人机协同（Human-in-the-Loop）的文档审查场景中，前端交互体验直接决定了业务审查人员的作业效率。
 

@@ -1,5 +1,5 @@
 ---
-title: "上下文窗口管理与截断防御：Token 经济学、滑窗合并与断点续传"
+title: "企业级 AI-OCR #7：上下文窗口管理与截断防御"
 date: "2026-08-30"
 tags: ["Token管理", "上下文窗口", "截断续传", "MapReduce", "Java 21"]
 slug: "enterprise-ai-ocr-part-7-context-window-truncation"
@@ -7,7 +7,7 @@ part: 7
 summary: "系统性剖析大模型视觉与文本处理中的物理边界约束与工程应对策略：详解视觉 Token 预算分配与 Payload 优化、基于 Java 21 虚拟线程的多页超长文档 Map-Reduce 并发提取流水线、输出截断（stop_reason=max_tokens）的自动嗅探与断点续传（Continuation Prompting）无缝缝合算法，以及跨页表格的滑窗消重归约。"
 ---
 
-# 上下文窗口管理与截断防御：Token 经济学、滑窗合并与断点续传
+# 企业级 AI-OCR #7：上下文窗口管理与截断防御
 
 在将多模态大模型应用于企业级长文档处理时，工程师经常会遭遇两堵“物理高墙”：
 1. **输入端限制（Input Limits）**：超长文档（如数十页合同或上百页报表）若一次性传入全部高清图片，会瞬间打爆模型的输入上下文窗口或触发云服务商单次请求 Payload 上限（如 AWS Bedrock 25MB 限制），并产生惊人的 Token 账单；

@@ -1,5 +1,5 @@
 ---
-title: "穿越第四维度：Sora、Wan 2.1 与 Cosmos 背后的 3D 因果视频 VAE（Causal Video VAE）架构"
+title: "VAE 全景拆解 #4：穿越第四维度"
 date: "2026-09-02"
 tags: ["Sora", "Wan 2.1", "Cosmos", "3D VAE", "因果卷积", "视频生成", "深度学习"]
 slug: "vae-part-4-video-sora-wan-causal-vae"
@@ -7,7 +7,7 @@ part: 4
 summary: "跨越二维平面，终极解密视频大模型背后的 3D 时空潜空间！"
 ---
 
-# 穿越第四维度：Sora、Wan 2.1 与 Cosmos 背后的 3D 因果视频 VAE（Causal Video VAE）架构
+# VAE 全景拆解 #4：穿越第四维度
 
 在前面三篇里，我们从生活通俗比喻、严密数学推导，一路杀到了 Stable Diffusion 和 Flux.1 的现代图像潜空间实战。
 

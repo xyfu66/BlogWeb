@@ -1,5 +1,5 @@
 ---
-title: "高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付"
+title: "企业级 AI-OCR #10：高可用防御架构与云原生 IaC 交付"
 date: "2026-08-30"
 tags: ["Resilience4j", "高可用", "AWS Fargate", "CloudFormation", "DevOps"]
 slug: "enterprise-ai-ocr-part-10-resilience4j-cloud-iac"
@@ -7,7 +7,7 @@ part: 10
 summary: "全面复盘企业级 IDP 系统的生产级韧性架构与云原生部署交付：深入配置 Resilience4j 熔断器、限流器、重试与隔离舱组合防线以应对外部大模型 API 抖动，详解 S3 预签名 URL 安全分发，并给出基于 AWS CloudFormation (IaC) 与 ECS Fargate 的自动化部署实战。"
 ---
 
-# 高可用防御性架构：Resilience4j 熔断降级实战与 AWS CloudFormation / ECS 交付
+# 企业级 AI-OCR #10：高可用防御架构与云原生 IaC 交付
 
 在任何将生成式 AI（Generative AI）深度集成到核心业务流的系统中，外部大模型 API 都是最大的 **“不确定性来源”**。
 
