@@ -72,9 +72,10 @@ def render_latex_to_png(latex_code: str, is_display: bool = False) -> Optional[P
     dpi = 220
     text_color = "#24292f"  # 深灰黑色，适配微信白色阅读背景
 
-    fig = None
+    figs_to_close = []
     try:
         fig = plt.figure(figsize=(0.1, 0.1), dpi=dpi)
+        figs_to_close.append(fig)
         # 加上数学模式定界符
         math_text = f"${cleaned_code}$"
         t = plt.text(
@@ -103,12 +104,11 @@ def render_latex_to_png(latex_code: str, is_display: bool = False) -> Optional[P
         )
         return output_path
 
-    except Exception as e:
+    except Exception:
         # 如果 mathtext 严格模式解析失败，尝试纯文本兜底
         try:
-            if fig:
-                plt.close(fig)
-            fig = plt.figure(figsize=(0.1, 0.1), dpi=dpi)
+            fallback_fig = plt.figure(figsize=(0.1, 0.1), dpi=dpi)
+            figs_to_close.append(fallback_fig)
             t = plt.text(
                 0, 0, cleaned_code,
                 fontsize=fontsize,
@@ -118,11 +118,11 @@ def render_latex_to_png(latex_code: str, is_display: bool = False) -> Optional[P
                 fontfamily='monospace'
             )
             plt.axis("off")
-            fig.canvas.draw()
-            renderer = fig.canvas.get_renderer()
+            fallback_fig.canvas.draw()
+            renderer = fallback_fig.canvas.get_renderer()
             bbox = t.get_window_extent(renderer=renderer)
-            bbox_inches = bbox.transformed(fig.dpi_scale_trans.inverted())
-            fig.savefig(
+            bbox_inches = bbox.transformed(fallback_fig.dpi_scale_trans.inverted())
+            fallback_fig.savefig(
                 str(output_path),
                 dpi=dpi,
                 bbox_inches=bbox_inches,
@@ -134,8 +134,8 @@ def render_latex_to_png(latex_code: str, is_display: bool = False) -> Optional[P
             print(f"[警告] 公式渲染失败: {latex_code[:40]}... (错误: {e2})")
             return None
     finally:
-        if fig:
-            plt.close(fig)
+        for f in figs_to_close:
+            plt.close(f)
 
 if __name__ == "__main__":
     # 测试常规行内与块级公式

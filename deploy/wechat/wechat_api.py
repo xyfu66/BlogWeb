@@ -15,6 +15,8 @@ from PIL import Image
 
 CURRENT_DIR = Path(__file__).resolve().parent
 TOKEN_CACHE_FILE = CURRENT_DIR / "token_cache.json"
+# SVG 转换中间文件统一存入工具目录的缓存中，不污染源码仓库
+SVG_CACHE_DIR = CURRENT_DIR / "formula_cache" / "svg_converted"
 
 # 加载 .env 变量
 ENV_FILE = CURRENT_DIR / ".env"
@@ -103,12 +105,13 @@ class WeChatClient:
     def prepare_image_for_wechat(self, image_path: Path, max_size_bytes: int = 1000 * 1024) -> Path:
         """
         检查并预处理图片：
-        1. 若为 SVG，转换为 PNG
+        1. 若为 SVG，转换为 PNG（输出到 formula_cache/svg_converted/ 避免污染源码）
         2. 若超出最大体积（默认1MB），进行尺寸与质量等比例压缩
         """
-        # 1. 矢量图 SVG 转换
+        # 1. 矢量图 SVG 转换（输出到工具目录缓存，不改动 public/ 目录下的源码）
         if image_path.suffix.lower() == ".svg":
-            converted_png = image_path.with_suffix(".png")
+            SVG_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            converted_png = SVG_CACHE_DIR / (image_path.stem + ".png")
             if not converted_png.is_file() or converted_png.stat().st_size < 100:
                 npx_cmd = shutil.which("npx")
                 if npx_cmd:
@@ -175,37 +178,47 @@ class WeChatClient:
 
     def upload_thumb_material(self, image_path: Path) -> str:
         """
-        上传封面图素材，返回 thumb_media_id
-        优先尝试永久素材接口 material/add_material，若订阅号权限不足则自动降级到临时素材接口 media/upload
+        上传封面图素材并返回 thumb_media_id。
+        对个人订阅号：
+          - 优先使用 material/add_material?type=image（永久素材）
+          - 若权限不足（errcode==40007/48001），降级到 media/upload?type=thumb
+        微信草稿符 thumb_media_id 需要的是 image 类型的 media_id，
+        而非 thumb 类型，请勿混淤。
         """
         token = self.get_access_token()
         clean_path = self.prepare_image_for_wechat(image_path, max_size_bytes=2 * 1024 * 1024)
-
         mime_type = "image/png" if clean_path.suffix.lower() == ".png" else "image/jpeg"
 
-        # 尝试 1: 新增临时素材 media/upload (支持所有未认证个人订阅号)
-        temp_url = f"https://api.weixin.qq.com/cgi-bin/media/upload?access_token={token}&type=thumb"
+        # 尝试 1： 永久素材 material/add_material?type=image
+        perm_url = f"https://api.weixin.qq.com/cgi-bin/material/add_material?access_token={token}&type=image"
         try:
             with open(clean_path, "rb") as f:
                 files = {"media": (clean_path.name, f, mime_type)}
-                resp = requests.post(temp_url, files=files, timeout=30)
+                resp = requests.post(perm_url, files=files, timeout=30)
                 data = resp.json()
-            if "thumb_media_id" in data or "media_id" in data:
-                return data.get("thumb_media_id") or data.get("media_id")
+            if "media_id" in data:
+                return data["media_id"]
+            err_code = data.get("errcode", 0)
+            if err_code not in (40007, 48001, 44004):
+                # 非权限类错误，不尝试降级
+                raise RuntimeError(f"永久素材上传失败: [{err_code}] {data.get('errmsg')}")
+            print(f"[提示] 永久素材接口权限不足 ({err_code})，尝试降级到临时素材...")
+        except RuntimeError:
+            raise
         except Exception as e:
-            print(f"[提示] 临时素材上传异常: {e}")
+            print(f"[提示] 永久素材请求异常: {e}，尝试降级...")
 
-        # 尝试 2: 新增永久素材 material/add_material
-        perm_url = f"https://api.weixin.qq.com/cgi-bin/material/add_material?access_token={token}&type=image"
+        # 降级尝试 2： 临时素材 media/upload?type=thumb
+        # 注意: thumb 类型素材返回的 thumb_media_id，若实际接口不支持可继续尝试 type=image
+        temp_url = f"https://api.weixin.qq.com/cgi-bin/media/upload?access_token={token}&type=image"
         with open(clean_path, "rb") as f:
             files = {"media": (clean_path.name, f, mime_type)}
-            resp = requests.post(perm_url, files=files, timeout=30)
+            resp = requests.post(temp_url, files=files, timeout=30)
             data = resp.json()
-
         if "media_id" in data:
             return data["media_id"]
 
-        raise RuntimeError(f"封面图素材上传失败: {data.get('errmsg')}")
+        raise RuntimeError(f"封面图素材上传失败: [{data.get('errcode')}] {data.get('errmsg')}")
 
     def add_draft(
         self,

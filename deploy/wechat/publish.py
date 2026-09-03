@@ -166,6 +166,14 @@ def main():
             print(f"   (未能自动调起浏览器: {e})")
         sys.exit(0)
 
+    if args.dry_run:
+        print("\n[DryRun] 工具可用性验证通过：")
+        print(f"  - 扫描文章库：{len(posts)} 篇文章可用")
+        print(f"  - 已选文章：《{selected_post['title']}》")
+        print(f"  - 封面图：{cover_image_path.name if cover_image_path else '[无]'}")
+        print("  - 注意：未向微信服务器发起任何网络请求")
+        sys.exit(0)
+
     # 正式发布模式：检查微信凭证
     cfg = get_config()
     if not cfg["app_id"] or not cfg["app_secret"] or "your_appid" in cfg["app_id"]:
@@ -174,10 +182,6 @@ def main():
         print("   您可以复制 deploy/wechat/.env.example 作为模板进行配置。")
         print("   提示：您可以先添加参数 --preview 测试本地转换排版效果。\n")
         sys.exit(1)
-
-    if args.dry_run:
-        print("\n[DryRun] 空跑预览模式通过，未向微信服务器发起网络调用。")
-        sys.exit(0)
 
     # 确认发布
     confirm = input(f"\n确认将《{selected_post['title']}》推送至微信订阅号草稿箱？(y/N): ").strip().lower()

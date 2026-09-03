@@ -14,7 +14,6 @@ import html
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
-import markdown_it
 from markdown_it import MarkdownIt
 
 from scanner import CURRENT_DIR, BLOG_ROOT, PUBLIC_IMAGES_DIR
@@ -147,9 +146,9 @@ def apply_inline_styles(html_content: str) -> str:
     )
     html_content = re.sub(r'<p>(.*?)</p>', f'<p style="{p_style}">\\1</p>', html_content, flags=re.DOTALL)
 
-    # Bold
-    html_content = re.sub(r'<strong>(.*?)</strong>', r'<strong style="font-weight: 700; color: #0f172a;">\1</strong>', html_content)
-    html_content = re.sub(r'<b>(.*?)</b>', r'<b style="font-weight: 700; color: #0f172a;">\1</b>', html_content)
+    # Bold (使用 DOTALL 防止跨行加粗内容没有获得样式)
+    html_content = re.sub(r'<strong>(.*?)</strong>', r'<strong style="font-weight: 700; color: #0f172a;">\1</strong>', html_content, flags=re.DOTALL)
+    html_content = re.sub(r'<b>(.*?)</b>', r'<b style="font-weight: 700; color: #0f172a;">\1</b>', html_content, flags=re.DOTALL)
 
     # Inline Code
     code_style = (
