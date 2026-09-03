@@ -11,7 +11,7 @@ import { ref } from 'vue'
  *   import defaultAvatar from '@/assets/avatar.png'
  * 享受 Vite 自动哈希指纹、编译时依赖校验与生产环境长效不可变缓存。
  */
-import defaultAvatar from '@/assets/avatar.svg'
+import defaultAvatar from '@/assets/avatar.jpg'
 
 const avatarSrc = ref(defaultAvatar)
 const isAvatarLoaded = ref(false)
