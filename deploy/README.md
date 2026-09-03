@@ -104,3 +104,58 @@ sudo mv /var/www/me/blog.bak /var/www/me/blog
 | `30` | `ExitDeploy` | 远程部署阶段失败（SSH 异常或原子切换脚本退出） |
 | `40` | `ExitHealth` | 服务健康探活失败（无法读取入口页面标记） |
 | `50` | `ExitScp` | SCP 文件传输阶段失败 |
+
+---
+
+## 微信公众号草稿箱同步发布工具 (`deploy/wechat`)
+
+本项目支持将博客撰写的 Markdown 文章（含普通文章与专栏系列）一键转换为微信公众号支持的**全内联高保真富文本 HTML**，并安全提交至微信订阅号/服务号的**草稿箱**。
+
+### 核心特性
+- **排版不移位**：纯内联 CSS 样式注入，适配微信公众号富文本规范。
+- **LaTeX 公式高保真**：行内与块级公式由 `matplotlib` 渲染为高清 PNG 并自动上传至微信服务器，解决公众号不支持 MathJax 的痛点。
+- **Mermaid 架构图渲染**：自动将 `flowchart`、`sequenceDiagram` 等时序图与流程图转为高质量图片并嵌入。
+- **封面图智能识别**：自动提取文章中的第一张图片作为草稿封面图（支持 SVG 自动转 PNG 及体积压缩）。
+- **告示块完美支持**：支持 GitHub / VitePress 风格的 `> [!NOTE]`、`> [!TIP]`、`> [!WARNING]` 等告示块。
+- **本地零成本预览**：支持 `--preview` 模式，在不调用微信 API 的情况下直接生成 HTML 并在系统默认浏览器中打开预览。
+
+### 快速上手
+
+#### 1. 安装 Python 依赖
+```powershell
+cd deploy\wechat
+pip install -r requirements.txt
+```
+
+#### 2. 配置微信公众平台凭证（用于正式发布）
+```powershell
+Copy-Item .env.example .env
+```
+编辑 `deploy/wechat/.env`，填写您的公众号凭证：
+```ini
+WECHAT_APP_ID=wx1234567890abcdef
+WECHAT_APP_SECRET=0123456789abcdef0123456789abcdef
+WECHAT_AUTHOR=刘祎锦
+BLOG_BASE_URL=https://bitvortex.vip
+```
+> 注：请在微信公众号后台【基本配置】->【IP白名单】中添加当前发布机器的外网 IP。
+
+#### 3. 交互式发布 / 本地预览
+```powershell
+# 交互式选择一篇文章并在浏览器中本地预览（不发往微信）：
+python .\deploy\wechat\publish.py --preview
+
+# 交互式选择文章并正式推送到微信公众号草稿箱：
+python .\deploy\wechat\publish.py
+
+# 查看所有文章列表：
+python .\deploy\wechat\publish.py --list
+
+# 指定某篇文章直接预览或发布：
+python .\deploy\wechat\publish.py --post 1 --preview
+python .\deploy\wechat\publish.py --post vae-part-1-intuitive-guide
+```
+
+#### 4. 在微信后台审阅与群发
+发布成功后，登录 [微信公众平台](https://mp.weixin.qq.com/) -> 进入【草稿箱】-> 审阅排版效果，点击【发表】或【群发】即可！
+

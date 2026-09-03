@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+formula_cache/
+mermaid_cache/
+token_cache.json
+preview/
+publish-audit.jsonl
