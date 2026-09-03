@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="100%" height="100%" style="background:#090d16; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#0f2b38" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#090d16" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#05070c" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Emerald Core Gradient -->
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#059669" stop-opacity="0.6"/>
+      <stop offset="80%" stop-color="#064e3b" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Frame Gradients -->
+    <linearGradient id="frameGradPast" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <linearGradient id="frameGradCurrent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <linearGradient id="frameGradFuture" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Beam & Arrow Markers -->
+    <marker id="arrowEmerald" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 7 4 L 0 7 z" fill="#34d399"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 7 4 L 0 7 z" fill="#f43f5e"/>
+    </marker>
+
+    <!-- Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="675" fill="url(#bgGlow)"/>
+
+  <!-- Grid lines for sci-fi depth -->
+  <g stroke="#1e293b" stroke-width="1" opacity="0.35">
+    <line x1="100" y1="580" x2="1100" y2="580" />
+    <line x1="200" y1="520" x2="1000" y2="520" />
+    <line x1="300" y1="470" x2="900" y2="470" />
+    <line x1="100" y1="580" x2="450" y2="420" />
+    <line x1="1100" y1="580" x2="750" y2="420" />
+  </g>
+
+  <!-- Title Header -->
+  <text x="600" y="55" fill="#f8fafc" font-size="26" font-weight="700" text-anchor="middle" letter-spacing="1">
+    3D 因果视频 VAE（Causal Video VAE）时空架构全景
+  </text>
+  <text x="600" y="85" fill="#94a3b8" font-size="14" text-anchor="middle">
+    时间单向因果约束 · 杜绝未来信息泄露 · 阿里 Wan 2.1 与 Sora 潜空间时空解构
+  </text>
+
+  <!-- TIME ARROW (Z-Axis) -->
+  <g transform="translate(160, 150)">
+    <line x1="0" y1="360" x2="880" y2="360" stroke="#34d399" stroke-width="3" marker-end="url(#arrowEmerald)"/>
+    <text x="895" y="365" fill="#34d399" font-size="15" font-weight="bold">时间轴 Time (t)</text>
+    <text x="0" y="390" fill="#64748b" font-size="12">过去 Past (t - 2)</text>
+    <text x="240" y="390" fill="#64748b" font-size="12">前序 Past (t - 1)</text>
+    <text x="490" y="390" fill="#34d399" font-size="13" font-weight="bold">当前帧 Current (t)</text>
+    <text x="730" y="390" fill="#ef4444" font-size="12">未来帧 Future (t + 1) [严格隔离]</text>
+  </g>
+
+  <!-- 3D VIDEO FRAMES FLOATING -->
+  <!-- Frame t - 2 (Historical) -->
+  <g transform="translate(180, 200)">
+    <rect width="160" height="220" rx="10" fill="url(#frameGradPast)" stroke="#475569" stroke-width="1.5"/>
+    <rect x="15" y="15" width="130" height="90" rx="6" fill="#1e293b" opacity="0.8"/>
+    <circle cx="50" cy="50" r="14" fill="#38bdf8" opacity="0.6"/>
+    <path d="M 25 90 Q 60 40 90 90" stroke="#38bdf8" stroke-width="2" fill="none"/>
+    <text x="80" y="140" fill="#94a3b8" font-size="13" text-anchor="middle" font-weight="600">Frame (t - 2)</text>
+    <text x="80" y="165" fill="#64748b" font-size="11" text-anchor="middle">已编码历史缓存</text>
+    <text x="80" y="185" fill="#38bdf8" font-size="11" text-anchor="middle">Feature-Cache</text>
+  </g>
+
+  <!-- Frame t - 1 (Historical) -->
+  <g transform="translate(420, 180)">
+    <rect width="170" height="230" rx="10" fill="url(#frameGradPast)" stroke="#64748b" stroke-width="1.5"/>
+    <rect x="15" y="15" width="140" height="95" rx="6" fill="#1e293b" opacity="0.8"/>
+    <circle cx="65" cy="50" r="15" fill="#38bdf8" opacity="0.7"/>
+    <path d="M 35 95 Q 75 45 115 95" stroke="#38bdf8" stroke-width="2" fill="none"/>
+    <text x="85" y="145" fill="#cbd5e1" font-size="13" text-anchor="middle" font-weight="600">Frame (t - 1)</text>
+    <text x="85" y="170" fill="#94a3b8" font-size="11" text-anchor="middle">前序时序依赖</text>
+    <text x="85" y="190" fill="#34d399" font-size="11" text-anchor="middle">感受野覆盖 ✔</text>
+  </g>
+
+  <!-- Frame t (Current Active Frame - Hero) -->
+  <g transform="translate(670, 150)" filter="url(#glow)">
+    <rect width="190" height="250" rx="12" fill="url(#frameGradCurrent)" stroke="#34d399" stroke-width="2.5"/>
+    <rect x="15" y="15" width="160" height="110" rx="8" fill="#064e3b" opacity="0.8"/>
+    <circle cx="85" cy="60" r="18" fill="#a7f3d0" opacity="0.9"/>
+    <path d="M 45 110 Q 95 50 145 110" stroke="#6ee7b7" stroke-width="3" fill="none"/>
+    <text x="95" y="160" fill="#ffffff" font-size="15" text-anchor="middle" font-weight="bold">Current Frame (t)</text>
+    <text x="95" y="185" fill="#a7f3d0" font-size="12" text-anchor="middle">因果卷积当前输出</text>
+    <rect x="30" y="200" width="130" height="26" rx="13" fill="#059669"/>
+    <text x="95" y="217" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="bold">16 通道隐变量 Z(t)</text>
+  </g>
+
+  <!-- Frame t + 1 (Future Frame - Blocked) -->
+  <g transform="translate(930, 180)">
+    <rect width="160" height="220" rx="10" fill="url(#frameGradFuture)" stroke="#475569" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <text x="80" y="100" fill="#64748b" font-size="36" text-anchor="middle" opacity="0.5">🔒</text>
+    <text x="80" y="145" fill="#f87171" font-size="13" text-anchor="middle" font-weight="600">Future (t + 1)</text>
+    <text x="80" y="170" fill="#94a3b8" font-size="11" text-anchor="middle">禁止偷看未来信息</text>
+    <text x="80" y="190" fill="#ef4444" font-size="11" text-anchor="middle">严防时序泄露 ❌</text>
+  </g>
+
+  <!-- CAUSAL CONV BEAMS (Past -> Current: Allowed) -->
+  <path d="M 350 280 C 440 260, 560 260, 670 270" fill="none" stroke="#34d399" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#arrowEmerald)"/>
+  <text x="500" y="245" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">时序单向依赖 (Causal Conv)</text>
+
+  <!-- FORBIDDEN BEAM (Future -> Current: Blocked) -->
+  <path d="M 930 260 C 890 250, 880 250, 865 250" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="4,4" marker-end="url(#arrowRed)"/>
+  <rect x="850" y="235" width="24" height="24" rx="12" fill="#ef4444"/>
+  <text x="862" y="251" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">✕</text>
+
+  <!-- 3D COMPRESSION RATIO BADGE (Bottom Banner) -->
+  <g transform="translate(200, 570)">
+    <rect width="800" height="75" rx="12" fill="#111827" stroke="#1f2937" stroke-width="1.5"/>
+    
+    <g transform="translate(40, 20)">
+      <text x="0" y="16" fill="#38bdf8" font-size="14" font-weight="bold">空间压缩比 (Spatial)</text>
+      <text x="0" y="38" fill="#e2e8f0" font-size="16" font-weight="bold">8 × 8 下采样 (64× 面积)</text>
+    </g>
+
+    <line x1="280" y1="15" x2="280" y2="60" stroke="#374151" stroke-width="1"/>
+
+    <g transform="translate(320, 20)">
+      <text x="0" y="16" fill="#34d399" font-size="14" font-weight="bold">时间压缩比 (Temporal)</text>
+      <text x="0" y="38" fill="#e2e8f0" font-size="16" font-weight="bold">4× 或 8× 时序压缩</text>
+    </g>
+
+    <line x1="540" y1="15" x2="540" y2="60" stroke="#374151" stroke-width="1"/>
+
+    <g transform="translate(580, 20)">
+      <text x="0" y="16" fill="#f43f5e" font-size="14" font-weight="bold">潜变量通道 (Channels)</text>
+      <text x="0" y="38" fill="#e2e8f0" font-size="16" font-weight="bold">16 通道高保真张量</text>
+    </g>
+  </g>
+</svg>
