@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1b2436" />
+      <stop offset="55%" stop-color="#0f141f" />
+      <stop offset="100%" stop-color="#080b11" />
+    </radialGradient>
+
+    <!-- Neon Cyan-to-Purple Gradient -->
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#58a6ff" />
+      <stop offset="45%" stop-color="#79b8ff" />
+      <stop offset="100%" stop-color="#bc8cff" />
+    </linearGradient>
+
+    <!-- Violet Glow Gradient -->
+    <linearGradient id="purpleGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#bc8cff" />
+      <stop offset="100%" stop-color="#58a6ff" />
+    </linearGradient>
+
+    <!-- Subtle Tech Grid Pattern -->
+    <pattern id="techGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(88, 166, 255, 0.05)" stroke-width="1" />
+    </pattern>
+
+    <!-- Soft Glow Filter -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="ringGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <clipPath id="avatarCircle">
+      <circle cx="256" cy="256" r="248" />
+    </clipPath>
+  </defs>
+
+  <!-- Avatar Base Clipped -->
+  <g clip-path="url(#avatarCircle)">
+    <!-- Base Dark Background -->
+    <rect width="512" height="512" fill="url(#bgGrad)" />
+
+    <!-- Grid Texture -->
+    <rect width="512" height="512" fill="url(#techGrid)" />
+
+    <!-- Ambient Lighting Orbs -->
+    <circle cx="160" cy="140" r="130" fill="#58a6ff" opacity="0.16" filter="url(#softGlow)" />
+    <circle cx="360" cy="220" r="140" fill="#bc8cff" opacity="0.14" filter="url(#softGlow)" />
+
+    <!-- Concentric Sci-Fi Orbit Rings -->
+    <circle cx="256" cy="256" r="215" fill="none" stroke="rgba(88, 166, 255, 0.15)" stroke-width="1.5" stroke-dasharray="4 8" />
+    <circle cx="256" cy="256" r="185" fill="none" stroke="rgba(188, 140, 255, 0.2)" stroke-width="2" stroke-dasharray="28 14 6 14" />
+    <circle cx="256" cy="256" r="150" fill="none" stroke="rgba(88, 166, 255, 0.25)" stroke-width="1.5" stroke-dasharray="12 12" />
+
+    <!-- Diagonal Accent Beams -->
+    <line x1="80" y1="40" x2="160" y2="120" stroke="url(#neonGrad)" stroke-width="2" opacity="0.4" stroke-linecap="round" />
+    <line x1="390" y1="90" x2="430" y2="130" stroke="url(#neonGrad)" stroke-width="2" opacity="0.35" stroke-linecap="round" />
+    <line x1="70" y1="360" x2="130" y2="420" stroke="url(#purpleGrad)" stroke-width="2" opacity="0.35" stroke-linecap="round" />
+
+    <!-- Developer/Architect Stylized Silhouette -->
+    <!-- Torso / Hoodie Shoulders -->
+    <path d="M120 480 C130 400, 175 365, 220 355 L256 375 L292 355 C337 365, 382 400, 392 480 Z" 
+          fill="#131924" stroke="rgba(88, 166, 255, 0.3)" stroke-width="2" />
+
+    <!-- Hoodie Neckline / Lapel Detail -->
+    <path d="M210 365 L256 425 L302 365" fill="none" stroke="url(#neonGrad)" stroke-width="3" stroke-linejoin="round" />
+    <path d="M230 425 L230 480" stroke="rgba(88, 166, 255, 0.4)" stroke-width="2" stroke-linecap="round" />
+    <path d="M282 425 L282 480" stroke="rgba(188, 140, 255, 0.4)" stroke-width="2" stroke-linecap="round" />
+
+    <!-- Neck -->
+    <rect x="236" y="300" width="40" height="60" rx="8" fill="#18202e" stroke="rgba(88, 166, 255, 0.2)" stroke-width="1.5" />
+
+    <!-- Head / Jaw Silhouette -->
+    <path d="M192 205 C192 145, 230 115, 256 115 C282 115, 320 145, 320 205 C320 255, 290 290, 256 295 C222 290, 192 255, 192 205 Z" 
+          fill="#1a2232" stroke="rgba(88, 166, 255, 0.4)" stroke-width="2" />
+
+    <!-- Cyberpunk Glasses / Visor -->
+    <g filter="url(#softGlow)">
+      <!-- Visor Frame Outer -->
+      <path d="M200 185 Q256 195 312 185 L316 215 Q256 228 196 215 Z" 
+            fill="#0b1019" stroke="url(#neonGrad)" stroke-width="3" stroke-linejoin="round" />
+      <!-- Visor Glowing Lens -->
+      <path d="M204 190 Q256 200 308 190 L311 210 Q256 222 201 210 Z" 
+            fill="url(#neonGrad)" opacity="0.85" />
+      <!-- Visor Specular Reflection -->
+      <path d="M214 193 L245 195 L235 207 L209 204 Z" fill="#ffffff" opacity="0.75" />
+      <path d="M260 196 L290 194 L284 205 L257 206 Z" fill="#ffffff" opacity="0.5" />
+    </g>
+
+    <!-- Modern Hi-Fi / Studio Headset (Music/Audio Signal Processing Reference) -->
+    <!-- Headband -->
+    <path d="M172 195 C165 110, 347 110, 340 195" fill="none" stroke="url(#purpleGrad)" stroke-width="7" stroke-linecap="round" />
+    <path d="M185 170 C180 120, 332 120, 327 170" fill="none" stroke="rgba(88, 166, 255, 0.5)" stroke-width="2" stroke-linecap="round" />
+
+    <!-- Left Ear Cup -->
+    <rect x="160" y="180" width="26" height="54" rx="12" fill="#131924" stroke="url(#neonGrad)" stroke-width="2.5" />
+    <circle cx="173" cy="207" r="7" fill="url(#neonGrad)" opacity="0.9" />
+
+    <!-- Right Ear Cup -->
+    <rect x="326" y="180" width="26" height="54" rx="12" fill="#131924" stroke="url(#purpleGrad)" stroke-width="2.5" />
+    <circle cx="339" cy="207" r="7" fill="url(#purpleGrad)" opacity="0.9" />
+
+    <!-- BitVortex Tech Crest / Audio Waveform below -->
+    <g transform="translate(256, 440)">
+      <circle cx="0" cy="0" r="26" fill="#0d1117" stroke="url(#neonGrad)" stroke-width="2.5" filter="url(#softGlow)" />
+      <!-- Waveform / BV Glyphs -->
+      <path d="M -12 2 L -8 -6 L -4 6 L 0 -10 L 4 8 L 8 -4 L 12 2" fill="none" stroke="url(#neonGrad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+
+    <!-- Particle Tech Sparkles -->
+    <circle cx="140" cy="110" r="3" fill="#58a6ff" filter="url(#softGlow)" />
+    <circle cx="370" cy="120" r="3.5" fill="#bc8cff" filter="url(#softGlow)" />
+    <circle cx="390" cy="280" r="2.5" fill="#58a6ff" />
+    <circle cx="120" cy="300" r="2.5" fill="#bc8cff" />
+    <circle cx="210" cy="90" r="2" fill="#58a6ff" />
+    <circle cx="310" cy="85" r="2" fill="#bc8cff" />
+  </g>
+
+  <!-- Circular Outer Tech Border Ring -->
+  <circle cx="256" cy="256" r="248" fill="none" stroke="url(#neonGrad)" stroke-width="4" filter="url(#ringGlow)" opacity="0.8" />
+  <circle cx="256" cy="256" r="248" fill="none" stroke="url(#neonGrad)" stroke-width="2.5" />
+</svg>

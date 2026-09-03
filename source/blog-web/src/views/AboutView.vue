@@ -1,4 +1,31 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
+/**
+ * 个人头像资源配置：
+ * 默认使用现代极客科技风矢量头像 (SVG)。
+ *
+ * 【后续提供您个人头像的替换方法】：
+ * 方式 1 (推荐)：将您的个人照片放入 `src/assets/` 目录（例如 `avatar.png` 或 `avatar.jpg`），
+ *               然后将下方引入替换为：
+ *               import defaultAvatar from '@/assets/avatar.png'
+ * 方式 2：将照片放到 `public/images/avatar.png`，
+ *         将下方 avatarSrc 初始化为：ref('/me/blog/images/avatar.png')
+ */
+import defaultAvatar from '@/assets/avatar.svg'
+
+const avatarSrc = ref(defaultAvatar)
+const isAvatarLoaded = ref(false)
+const hasAvatarError = ref(false)
+
+function onAvatarLoad() {
+  isAvatarLoaded.value = true
+}
+
+function onAvatarError() {
+  hasAvatarError.value = true
+}
+
 const techSkills = [
   {
     category: '开发语言',
@@ -43,9 +70,27 @@ const techSkills = [
     <section class="about-header-banner">
       <div class="bl-container">
         <div class="header-inner">
-          <div class="profile-avatar">
+          <div class="profile-avatar" title="刘祎锦 (BitVortex)">
             <div class="avatar-glow"></div>
-            <div class="avatar-text">BV (BitVortex Tech)</div>
+            <div class="avatar-container">
+              <img
+                v-if="!hasAvatarError"
+                :src="avatarSrc"
+                alt="刘祎锦"
+                class="avatar-image"
+                :class="{ 'is-loaded': isAvatarLoaded }"
+                loading="eager"
+                @load="onAvatarLoad"
+                @error="onAvatarError"
+              />
+              <div v-else class="avatar-fallback" title="默认标识">
+                <span class="fallback-initials">BV</span>
+              </div>
+            </div>
+            <!-- 极客状态呼吸指示徽章 -->
+            <div class="avatar-status-badge" title="在线 / 全栈 & 算法工程">
+              <span class="status-dot"></span>
+            </div>
           </div>
           <div class="profile-heading">
             <h1 class="profile-name">刘祎锦</h1>
@@ -154,32 +199,126 @@ const techSkills = [
 
 .profile-avatar {
   position: relative;
-  width: 88px;
-  height: 88px;
+  width: 92px;
+  height: 92px;
   flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
 }
 
 .avatar-glow {
   position: absolute;
-  inset: -4px;
-  background: linear-gradient(135deg, #58a6ff, #bc8cff);
+  inset: -6px;
+  background: radial-gradient(circle, rgba(88, 166, 255, 0.4), rgba(188, 140, 255, 0.35) 60%, transparent 80%);
   border-radius: 50%;
-  filter: blur(8px);
-  opacity: 0.6;
+  filter: blur(10px);
+  opacity: 0.7;
+  transition: opacity var(--bl-dur-normal) var(--bl-ease), filter var(--bl-dur-normal) var(--bl-ease), transform var(--bl-dur-normal) var(--bl-ease);
 }
 
-.avatar-text {
+.profile-avatar:hover .avatar-glow {
+  opacity: 1;
+  filter: blur(14px);
+  transform: scale(1.08);
+}
+
+.avatar-container {
   position: relative;
   width: 100%;
   height: 100%;
   border-radius: 50%;
+  overflow: hidden;
+  background: #0d1117;
+  border: 2px solid rgba(88, 166, 255, 0.45);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(88, 166, 255, 0.15);
+  z-index: 1;
+  transition: border-color var(--bl-dur-normal) var(--bl-ease), transform var(--bl-dur-normal) var(--bl-ease), box-shadow var(--bl-dur-normal) var(--bl-ease);
+}
+
+.profile-avatar:hover .avatar-container {
+  border-color: rgba(188, 140, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(88, 166, 255, 0.25), inset 0 0 16px rgba(188, 140, 255, 0.2);
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform var(--bl-dur-normal) var(--bl-ease);
+}
+
+.avatar-image.is-loaded {
+  opacity: 1;
+}
+
+.profile-avatar:hover .avatar-image {
+  transform: scale(1.06);
+}
+
+.avatar-fallback {
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, #58a6ff, #bc8cff);
   color: #0d1117;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 2rem;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+/* 在线状态微徽章 */
+.avatar-status-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  background: #0d1117;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background: #3fb950;
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: #3fb950;
+  opacity: 0.7;
+  animation: statusPulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes statusPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
 }
 
 .profile-heading {
