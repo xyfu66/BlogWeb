@@ -397,5 +397,90 @@
   fill: #f0f6fc !important;
 }
 
+/* ==========================================================================
+   KaTeX Math Formula Styling
+   ========================================================================== */
 
+.markdown-body .katex-block-wrapper {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--bl-surface-hover);
+  border: 1px solid var(--bl-border);
+  border-radius: var(--bl-radius-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+  transition: border-color var(--bl-dur-fast) var(--bl-ease), background var(--bl-dur-fast) var(--bl-ease);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
+.markdown-body .katex-block-wrapper:hover {
+  border-color: rgba(88, 166, 255, 0.3);
+}
+
+/* 块级公式内部显示与自适应 */
+.markdown-body .katex-block-wrapper .katex-display {
+  margin: 0;
+  padding: 0;
+  overflow-x: visible;
+  overflow-y: visible;
+}
+
+/* 段落内展示级公式（如段落行内带有标点符号或在引用块行内） */
+.markdown-body .katex-display-inline {
+  display: block;
+  margin: 0.85rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+.markdown-body .katex-display-inline .katex-display {
+  margin: 0;
+  padding: 0;
+}
+
+/* 行内公式垂直基线对齐与微调 */
+.markdown-body .katex {
+  font-size: 1.06em;
+  text-rendering: auto;
+  line-height: 1.2;
+}
+
+/* 引用块内部嵌套的公式样式融合 */
+.markdown-body blockquote .katex-block-wrapper {
+  margin: 0.75rem 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 公式横向滚动条定制 */
+.markdown-body .katex-block-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.markdown-body .katex-block-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.markdown-body .katex-block-wrapper::-webkit-scrollbar-thumb {
+  background: var(--bl-border);
+  border-radius: 3px;
+}
+
+.markdown-body .katex-block-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--bl-text-secondary);
+}
+
+/* 语法错误降级展示 */
+.markdown-body .katex-error {
+  color: #f85149;
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px dashed rgba(248, 81, 73, 0.4);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: var(--bl-font-mono, monospace);
+  font-size: 0.9em;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
