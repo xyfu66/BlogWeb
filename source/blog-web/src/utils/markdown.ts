@@ -113,6 +113,24 @@ marked.use({
       }
       return false
     },
+    image(token: any) {
+      const href = (typeof token === 'object' && token ? token.href : arguments[0]) || ''
+      const title = typeof token === 'object' && token ? token.title : arguments[1]
+      const text = (typeof token === 'object' && token ? token.text : arguments[2]) || ''
+
+      let resolvedHref = href
+      // 针对以 / 开头的站内静态路径（例如 /images/...），自动拼接 Vite 的 base 路径（如 /me/blog/），实现环境解耦
+      if (resolvedHref.startsWith('/') && !resolvedHref.startsWith('//')) {
+        const base = (import.meta.env?.BASE_URL || '/').replace(/\/$/, '')
+        if (base && !resolvedHref.startsWith(base + '/')) {
+          resolvedHref = `${base}${resolvedHref}`
+        }
+      }
+
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''
+      const altAttr = text ? ` alt="${escapeHtml(text)}"` : ''
+      return `<img src="${escapeHtml(resolvedHref)}"${altAttr}${titleAttr} loading="lazy" />`
+    },
   },
 })
 
@@ -203,6 +221,7 @@ const CONTENT_HTML_PURIFY: DomPurifyConfig = {
     'rel',
     'src',
     'alt',
+    'loading',
     'class',
     'id',
     'style',

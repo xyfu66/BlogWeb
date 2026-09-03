@@ -34,7 +34,7 @@ $$1024 \times 1024 \times 3 (\text{红、绿、蓝三原色}) = 3,145,728 \text{
 
 整整 **314 万个独立的像素数字**！
 
-![脱水蔬菜与高斯魔法箱](/me/blog/images/vae/part1-latent-metaphor.jpg)
+![脱水蔬菜与高斯魔法箱](/images/vae/part1-latent-metaphor.jpg)
 
 > [!NOTE]
 > **在 300 万颗沙子上绣花的绝望**  

@@ -29,7 +29,7 @@ summary: "撕掉死板公式的冰冷伪装！从几何流形与物理张力视�
 
 $$p(z|x) = \frac{p(x|z) \cdot p(z)}{p(x)}$$
 
-![变分自由能与流形拉锯战](/me/blog/images/vae/part2-manifold-equilibrium.jpg)
+![变分自由能与流形拉锯战](/images/vae/part2-manifold-equilibrium.jpg)
 
 请把目光聚焦在分母 $p(x)$ 上：
 为了求出分母，根据全概率公式，我们必须把所有可能的潜在密码 $z$ 全部穷举并积分：

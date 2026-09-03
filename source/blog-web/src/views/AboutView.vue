@@ -3,14 +3,13 @@ import { ref } from 'vue'
 
 /**
  * 个人头像资源配置：
- * 默认使用现代极客科技风矢量头像 (SVG)。
+ * 默认使用现代极客科技风矢量头像 (SVG)，统一收拢在 `src/assets/` 模块化资产目录中。
  *
- * 【后续提供您个人头像的替换方法】：
- * 方式 1 (推荐)：将您的个人照片放入 `src/assets/` 目录（例如 `avatar.png` 或 `avatar.jpg`），
- *               然后将下方引入替换为：
- *               import defaultAvatar from '@/assets/avatar.png'
- * 方式 2：将照片放到 `public/images/avatar.png`，
- *         将下方 avatarSrc 初始化为：ref('/me/blog/images/avatar.png')
+ * 【更换个人头像说明】：
+ * 将您的个人照片放入 `src/assets/` 目录（例如 `avatar.png` 或 `avatar.jpg`），
+ * 然后修改下方 import 语句即可：
+ *   import defaultAvatar from '@/assets/avatar.png'
+ * 享受 Vite 自动哈希指纹、编译时依赖校验与生产环境长效不可变缓存。
  */
 import defaultAvatar from '@/assets/avatar.svg'
 

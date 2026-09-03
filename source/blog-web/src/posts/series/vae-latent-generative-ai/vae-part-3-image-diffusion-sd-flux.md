@@ -33,7 +33,7 @@ summary: "深入现代工业级图像生成的最前线：全景剖析 LDM 两�
 1. **感知压缩阶段（Perceptual Compression）**：由 VAE 负责。它像一个高保真的数码扫描仪，专门剔除人眼不敏感的高频冗余噪波；
 2. **语义生成阶段（Semantic Generation）**：由 UNet / DiT 负责。它在一个干净、抽象的低维空间里专心致志地推演物体的骨架、光影与叙事关系。
 
-![潜空间通道革命](/me/blog/images/vae/part3-channel-evolution.jpg)
+![潜空间通道革命](/images/vae/part3-channel-evolution.jpg)
 
 ### 为什么空间下采样系数偏偏是 $f = 8$？
 在 SD 1.5、SD 2.1、SDXL、SD3 以及 Flux.1 中，潜空间几乎清一色地采用了 **8 倍下采样（$f=8$）**。也就是说：

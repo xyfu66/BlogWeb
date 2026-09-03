@@ -36,7 +36,7 @@ $$120 \times 1080 \times 1920 \times 3 \times 4 \text{ 字节} \approx \mathbf{2
 
 仅仅 5 秒钟的原生像素，就要霸占近 3GB 的显存；如果是长达几分钟的商业短片，任何数据中心的一张 H100/A100 显卡都会在第一秒被撑爆！
 
-![3D 因果视频 VAE 时空架构全景](/me/blog/images/vae/part4-causal-video-cube.svg)
+![3D 因果视频 VAE 时空架构全景](/images/vae/part4-causal-video-cube.svg)
 
 ### 连环画方案（逐帧 2D VAE）的两大致命绝症
 
