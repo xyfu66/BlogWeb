@@ -36,7 +36,7 @@ def print_banner():
     print("=" * 70)
 
 def list_posts(posts):
-    print(f"\n📚 博客文章库中共有 {len(posts)} 篇文章（已按发布时间倒序排列）：\n")
+    print(f"\n📚 博客文章库中共有 {len(posts)} 篇文章（时间升序；同系列连续且按章节序）：\n")
     for i, p in enumerate(posts, 1):
         series_info = f" [专栏: {p['series_name']}]" if p.get('series_name') else ""
         date_str = p.get('date') or "无日期"
