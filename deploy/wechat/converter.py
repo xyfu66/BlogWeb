@@ -57,18 +57,6 @@ def find_local_image_path(src: str, md_file_path: Optional[str] = None) -> Optio
 
     return None
 
-def extract_first_image(markdown_body: str, md_file_path: Optional[str] = None) -> Optional[Path]:
-    """
-    提取 Markdown 文章中出现的首张图片本地路径（用于微信封面图）
-    """
-    img_pattern = re.compile(r'!\[.*?\]\((.*?)\)')
-    for match in img_pattern.finditer(markdown_body):
-        src = match.group(1).split()[0].strip().strip('"').strip("'")
-        local_path = find_local_image_path(src, md_file_path)
-        if local_path and local_path.is_file():
-            return local_path
-    return None
-
 def preprocess_cjk_bold(text: str) -> str:
     """
     解决 CommonMark 中 CJK 汉字与中英文标点紧邻时加粗定界符 ** 无法正确闭合的问题

@@ -4,22 +4,34 @@ cover_generator.py: 为微信草稿生成 2.35:1 居中标题封面图
 """
 from __future__ import annotations
 
+import os
 import platform
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+from dotenv import load_dotenv
 from PIL import Image, ImageDraw, ImageFont
+
+_CURRENT_DIR = Path(__file__).resolve().parent
+_ENV_FILE = _CURRENT_DIR / ".env"
+if _ENV_FILE.is_file():
+    load_dotenv(_ENV_FILE)
 
 # 微信头条封面常用比例 2.35:1；略高于 900×383 以便清晰上传后再压缩
 COVER_WIDTH = 1200
 COVER_HEIGHT = 510
+DEFAULT_BRAND = "BitVortex"
 
 # 中心安全区（次条/列表 1:1 裁切时仍可读）
 SAFE_RATIO = 0.72
 MAX_TITLE_FONT = 64
 MIN_TITLE_FONT = 28
 SUBTITLE_FONT = 26
+SUBTITLE_LINE_SPACING = 1.3
 LINE_SPACING = 1.25
+TITLE_SUBTITLE_GAP = 8
+BRAND_FONT_SIZE = 18
+BRAND_BOTTOM_MARGIN = 28
 
 _FONT_CANDIDATES_WIN = [
     r"C:\Windows\Fonts\msyhbd.ttc",
@@ -188,23 +200,30 @@ def _draw_background(img: Image.Image) -> None:
     img.paste(composed)
 
 
+def _resolve_brand() -> str:
+    return (os.getenv("COVER_BRAND") or DEFAULT_BRAND).strip() or DEFAULT_BRAND
+
+
 def generate_cover_image(
     *,
     title: str,
     slug: str,
     series_name: Optional[str] = None,
     out_dir: Optional[Path] = None,
+    brand: Optional[str] = None,
 ) -> Path:
     """
     生成居中标题封面 JPG，写入 out_dir/{slug}.jpg 并返回路径。
+    品牌字优先用参数 brand，否则读 COVER_BRAND，最后回退 DEFAULT_BRAND。
     """
     title = (title or "").strip() or "未命名文章"
     slug = (slug or "untitled").strip() or "untitled"
+    brand_text = (brand or _resolve_brand()).strip() or DEFAULT_BRAND
     # 文件名安全
     safe_slug = "".join(c if c.isalnum() or c in "-_" else "-" for c in slug).strip("-") or "untitled"
 
     if out_dir is None:
-        out_dir = Path(__file__).resolve().parent / ".cache" / "covers"
+        out_dir = _CURRENT_DIR / ".cache" / "covers"
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{safe_slug}.jpg"
@@ -217,17 +236,31 @@ def generate_cover_image(
     safe_w = COVER_WIDTH * SAFE_RATIO
     max_text_width = safe_w * 0.92
     subtitle = (series_name or "").strip()
-    subtitle_reserve = (SUBTITLE_FONT * 1.6 + 24) if subtitle else 0
-    max_title_height = COVER_HEIGHT * 0.55 - subtitle_reserve
+
+    # 先按实际折行计算副标题高度，避免多行挤占标题/底标
+    sub_font = _load_font(SUBTITLE_FONT, font_path) if subtitle else None
+    sub_lines: List[str] = []
+    sub_line_h = SUBTITLE_FONT * SUBTITLE_LINE_SPACING
+    if subtitle and sub_font is not None:
+        sub_lines = _wrap_title(draw, subtitle, sub_font, max_text_width, max_lines=2)
+    subtitle_h = (len(sub_lines) * sub_line_h + TITLE_SUBTITLE_GAP) if sub_lines else 0
+
+    brand_reserve = BRAND_FONT_SIZE + BRAND_BOTTOM_MARGIN
+    max_title_height = max(
+        MIN_TITLE_FONT * LINE_SPACING,
+        COVER_HEIGHT * 0.58 - subtitle_h - brand_reserve * 0.35,
+    )
 
     title_font, lines, title_size = _fit_title_font(
         draw, title, font_path, max_text_width, max_title_height
     )
 
     line_height = title_size * LINE_SPACING
-    block_h = line_height * len(lines) + subtitle_reserve
+    title_block_h = line_height * len(lines)
+    block_h = title_block_h + subtitle_h
     cx = COVER_WIDTH / 2
     cy = COVER_HEIGHT / 2
+    # 整体文字块垂直居中；标题首行中心在 start_y
     start_y = cy - block_h / 2 + line_height / 2
 
     stroke_fill = (15, 23, 42)
@@ -245,14 +278,11 @@ def generate_cover_image(
             stroke_fill=stroke_fill,
         )
 
-    if subtitle:
-        sub_font = _load_font(SUBTITLE_FONT, font_path)
-        sub_y = start_y + len(lines) * line_height + 8
-        # 副标题也限制在安全宽度内
-        sub_lines = _wrap_title(draw, subtitle, sub_font, max_text_width, max_lines=2)
+    if sub_lines and sub_font is not None:
+        sub_y = start_y + title_block_h - line_height / 2 + TITLE_SUBTITLE_GAP + sub_line_h / 2
         for j, sl in enumerate(sub_lines):
             draw.text(
-                (cx, sub_y + j * SUBTITLE_FONT * 1.3),
+                (cx, sub_y + j * sub_line_h),
                 sl,
                 font=sub_font,
                 fill=(148, 163, 184),
@@ -261,11 +291,10 @@ def generate_cover_image(
                 stroke_fill=stroke_fill,
             )
 
-    # 底部品牌细标
-    brand_font = _load_font(18, font_path)
+    brand_font = _load_font(BRAND_FONT_SIZE, font_path)
     draw.text(
-        (cx, COVER_HEIGHT - 28),
-        "BitVortex",
+        (cx, COVER_HEIGHT - BRAND_BOTTOM_MARGIN),
+        brand_text,
         font=brand_font,
         fill=(100, 116, 139),
         anchor="mm",
@@ -276,10 +305,17 @@ def generate_cover_image(
 
 
 if __name__ == "__main__":
-    # 快速自检
-    p = generate_cover_image(
-        title="企业级 AI-OCR #1：架构选型与 Java 21 落地实践指南",
-        slug="enterprise-ai-ocr-part-1-architecture-java21",
-        series_name="企业级 AI-OCR",
+    import argparse
+
+    parser = argparse.ArgumentParser(description="按任意标题生成微信草稿封面")
+    parser.add_argument("--title", required=True, help="文章标题")
+    parser.add_argument("--slug", required=True, help="文章 slug，用作输出文件名")
+    parser.add_argument("--series", default=None, help="系列名（可选副标题）")
+    args = parser.parse_args()
+    print(
+        generate_cover_image(
+            title=args.title,
+            slug=args.slug,
+            series_name=args.series,
+        )
     )
-    print(p)

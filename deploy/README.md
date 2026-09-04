@@ -104,7 +104,7 @@ sudo mv /var/www/me/blog.bak /var/www/me/blog
 - **排版不移位**：纯内联 CSS 样式注入，适配微信公众号富文本规范。
 - **LaTeX 公式高保真**：行内与块级公式由 `matplotlib` 渲染为高清 PNG 并自动上传至微信服务器，解决公众号不支持 MathJax 的痛点。
 - **Mermaid 架构图渲染**：自动将 `flowchart`、`sequenceDiagram` 等时序图与流程图转为高质量图片并嵌入。
-- **封面图智能识别**：自动提取文章中的第一张图片作为草稿封面图（支持 SVG 自动转 PNG 及体积压缩）。
+- **程序化标题封面**：默认按文章标题（及系列名）用 Pillow 生成 2.35:1 居中标题封面，不再使用头像或正文首图；可用 `--cover` 指定本地图覆盖。
 - **告示块完美支持**：支持 GitHub / VitePress 风格的 `> [!NOTE]`、`> [!TIP]`、`> [!WARNING]` 等告示块。
 - **本地零成本预览**：支持 `--preview` 模式，在不调用微信 API 的情况下直接生成 HTML 并在系统默认浏览器中打开预览。
 - **选择列表时间升序**：文章按发布时间升序编号（旧→新），最新文章序号最大；同系列聚合为连续块并按 `part` 阅读序排列，便于交互选择。
@@ -126,6 +126,7 @@ Copy-Item .env.example .env
 WECHAT_APP_ID=wx1234567890abcdef
 WECHAT_APP_SECRET=0123456789abcdef0123456789abcdef
 WECHAT_AUTHOR=刘祎锦
+COVER_BRAND=BitVortex
 BLOG_BASE_URL=https://bitvortex.vip
 ```
 > 注：请在微信公众号后台【基本配置】->【IP白名单】中添加当前发布机器的外网 IP。
@@ -144,6 +145,9 @@ python .\deploy\wechat\publish.py --list
 # 指定某篇文章直接预览或发布：
 python .\deploy\wechat\publish.py --post 1 --preview
 python .\deploy\wechat\publish.py --post vae-part-1-intuitive-guide
+
+# 手动指定封面图（跳过程序生成）：
+python .\deploy\wechat\publish.py --post 1 --cover D:\covers\custom.jpg
 ```
 
 #### 4. 在微信后台审阅与群发
