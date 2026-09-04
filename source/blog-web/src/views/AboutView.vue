@@ -161,7 +161,7 @@ const techSkills = [
           <div class="project-item">
             <div class="project-header">
               <h3 class="project-name">BitVortex 官方平台</h3>
-              <span class="project-badge">企业站</span>
+              <span class="project-badge">品牌官网</span>
             </div>
             <p class="project-desc">
               BitVortex 品牌官网，基于尖端 WebGL 视觉与声学设计语言打造的前沿数字展示门户。

@@ -3,7 +3,7 @@ title: "个人技术博客的架构设计与实现"
 date: "2026-08-29"
 tags: ["架构", "Vue3", "Vite", "工程化"]
 slug: "hello-world"
-summary: "记录本博客的工程架构选型与设计理念：基于 Vue 3 + Vite + TypeScript 技术栈，通过构建期虚拟模块实现无后端纯静态 Markdown 博客渲染，并与兄弟工程共享部署基础设施。"
+summary: "记录本博客的工程架构选型与设计理念：基于 Vue 3 + Vite + TypeScript 技术栈，通过构建期虚拟模块实现无后端纯静态 Markdown 博客渲染，并配套独立的自动化发布流水线。"
 ---
 
 # 个人技术博客的架构设计与实现
@@ -18,7 +18,7 @@ summary: "记录本博客的工程架构选型与设计理念：基于 Vue 3 + V
 
 1. **零维护成本**：无需运行额外的后端服务进程或数据库实例，避免数据库注入与安全漏洞。
 2. **极速响应与防缓存**：HTML 与静态资源托管于 Nginx，利用 HTTP 缓存机制与原子文件替换达到毫秒级首屏加载。
-3. **与兄弟工程共存**：博客作为 `bitvortex.vip` 域名下的 `/me/blog/` 子路径，通过 Nginx 反向代理与现有站点共用。
+3. **子路径挂载**：博客以 主站 下的 `/me/blog/` 子路径对外提供服务，由反向代理将请求落到静态目录。
 
 ---
 
@@ -26,7 +26,7 @@ summary: "记录本博客的工程架构选型与设计理念：基于 Vue 3 + V
 
 | 维度 | 选型 | 优势与原因 |
 |---|---|---|
-| 核心框架 | **Vue 3.5 + TypeScript** | 组合式 API，严格类型安全，与 MSS portal 对齐 |
+| 核心框架 | **Vue 3.5 + TypeScript** | 组合式 API，严格类型安全，利于长期演进与重构 |
 | 构建工具 | **Vite 8** | 毫秒级冷启动，灵活的自定义插件系统 |
 | Markdown 渲染 | **Marked 18 + DOMPurify** | 高性能 Markdown 解析与严密 XSS 消毒 |
 | 状态管理 | **Pinia 4** | 结构化管理文章列表、当前活跃标签与缓存 |
@@ -64,7 +64,7 @@ export function blogPostsPlugin(): Plugin {
 
 ## 零停机原子静态部署
 
-博客继承了 BitVortex 体系的自动化发布流水线：
+本仓配备独立的 PowerShell 自动化发布流水线：
 
 1. 本地通过 PowerShell 脚本完成 TypeScript 编译与 Vite 构建。
 2. 构建产物通过 `scp` 上传至远程服务器的临时 Staging 目录（`/var/www/me/blog.staging`）。

@@ -7,17 +7,16 @@
 ## 部署模型与架构定位
 
 - **域名与路径**：单域名子路径 `https://<domain>/me/blog/`（如 `bitvortex.vip/me/blog/`）
-- **静态目录**：`/var/www/me/blog`（父根 `/var/www`，配合 Edge 中 `root` + `try_files`）
-- **网关归属**：共享域 **Edge Gateway** 唯一 SoT 在主工程 **CorpWeb**（`deploy/nginx/`，契约见 CorpWeb `EDGE_ROUTING_CONTRACT.md`）。本仓**不**维护 nginx 模板；日常只发布静态产物。
+- **静态目录**：`/var/www/me/blog`（父根 `/var/www`，由 Nginx `root` + `try_files` 提供 SPA 回退）
+- **本仓职责**：只构建并发布静态产物；**不**维护 nginx 模板或站点配置（仓库内无 `deploy/nginx/`）
 
 ---
 
 ## 配置文件体系
 
-| 配置文件 | 归属层级 | 说明 |
-|:---|:---|:---|
-| `deploy/.env` | L0 编排层 | 本机维护。包含 SSH 目标、端口、私钥路径及远端目录。**已 gitignore**。 |
-| CorpWeb `deploy/nginx/*` | L4 Edge | 路由渲染 SoT；改 `/me/blog/` 规则须按契约向 CorpWeb 提需求。 |
+| 配置文件 | 说明 |
+|:---|:---|
+| `deploy/.env` | 本机维护。包含 SSH 目标、端口、私钥路径及远端目录。**已 gitignore**。 |
 
 ### 快速初始化配置
 ```powershell
@@ -43,15 +42,9 @@ sudo chown -R deploy:www-data /var/www/me
 sudo chmod -R 755 /var/www/me
 ```
 
-### 第 2 步 — Nginx 路由生效（仅 CorpWeb Edge）
+### 第 2 步 — 确认反向代理已覆盖 `/me/blog/`
 
-在服务器执行 CorpWeb 的网关安装脚本（已集成 `/me/blog/`；契约与 LE 安全 apply 见 CorpWeb `deploy/README.md` / `EDGE_ROUTING_CONTRACT.md`）：
-
-```bash
-sudo bash /opt/CorpWeb/deploy/scripts/remote/install-nginx-sites.sh
-```
-
-禁止在本仓粘贴 location 或维护 `blog.conf`（会再次双写）。
+上线前请确认共享域名的 Nginx（或等价边缘代理）已将 `/me/blog/` 指到本仓静态目录 `/var/www/me/blog`（含 SPA `try_files` 回退）。日常发布只更新静态文件，无需改代理配置；本仓亦不存放或粘贴 location 片段。
 
 ---
 
