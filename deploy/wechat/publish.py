@@ -5,7 +5,6 @@ publish.py: 微信公众号文章交互式发布与本地效果预览主入口
 import os
 import sys
 import json
-import time
 import argparse
 import webbrowser
 from datetime import datetime
@@ -21,13 +20,14 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 CURRENT_DIR = Path(__file__).resolve().parent
-BLOG_ROOT = CURRENT_DIR.parent.parent
 PREVIEW_DIR = CURRENT_DIR / "preview"
 PREVIEW_DIR.mkdir(parents=True, exist_ok=True)
 AUDIT_LOG_FILE = CURRENT_DIR / "publish-audit.jsonl"
+COVER_CACHE_DIR = CURRENT_DIR / ".cache" / "covers"
 
 from scanner import scan_all_posts
-from converter import WeChatArticleConverter, extract_first_image
+from converter import WeChatArticleConverter
+from cover_generator import generate_cover_image
 from wechat_api import WeChatClient, get_config
 
 def print_banner():
@@ -56,17 +56,28 @@ def record_audit_log(post: Dict[str, Any], media_id: str):
     with open(AUDIT_LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
-def get_fallback_cover_image() -> Optional[Path]:
-    """寻找博客全局默认备用封面图"""
-    candidates = [
-        BLOG_ROOT / "source" / "blog-web" / "src" / "assets" / "avatar.jpg",
-        BLOG_ROOT / "source" / "blog-web" / "src" / "assets" / "avatar.png",
-        BLOG_ROOT / "source" / "blog-web" / "public" / "favicon.svg",
-    ]
-    for c in candidates:
-        if c.is_file():
-            return c
-    return None
+def resolve_cover_image(selected_post: Dict[str, Any], cover_arg: Optional[str]) -> Path:
+    """--cover 优先；否则按标题生成居中封面图。"""
+    if cover_arg:
+        c_path = Path(cover_arg).resolve()
+        if c_path.is_file():
+            print(f"  🖼️  封面图: [手动指定] {c_path}")
+            return c_path
+        print(f"[警告] 指定的封面图文件不存在: {cover_arg}，将改为程序生成标题封面")
+
+    try:
+        path = generate_cover_image(
+            title=selected_post.get("title") or "未命名文章",
+            slug=selected_post.get("slug") or "untitled",
+            series_name=selected_post.get("series_name"),
+            out_dir=COVER_CACHE_DIR,
+        )
+    except Exception as e:
+        print(f"\n❌ 生成封面标题图失败: {e}")
+        sys.exit(1)
+    print(f"  🖼️  封面图: [程序生成标题封面] {path}")
+    return path
+
 
 def main():
     parser = argparse.ArgumentParser(description="BlogWeb 微信公众号发布工具")
@@ -126,26 +137,7 @@ def main():
     print(f"  📁 路径: {selected_post.get('file_path')}")
     print("-" * 70)
 
-    # 封面图获取逻辑
-    cover_image_path: Optional[Path] = None
-    if args.cover:
-        c_path = Path(args.cover).resolve()
-        if c_path.is_file():
-            cover_image_path = c_path
-        else:
-            print(f"[警告] 指定的封面图文件不存在: {args.cover}")
-
-    if not cover_image_path:
-        # 自动提取文章第一张图
-        auto_img = extract_first_image(selected_post["body"], selected_post.get("file_path"))
-        if auto_img and auto_img.is_file():
-            cover_image_path = auto_img
-            print(f"  🖼️  封面图: [自动识别首图] {auto_img.name}")
-        else:
-            fallback = get_fallback_cover_image()
-            if fallback:
-                cover_image_path = fallback
-                print(f"  🖼️  封面图: [文章内无图片，自动使用默认封面] {fallback.name}")
+    cover_image_path = resolve_cover_image(selected_post, args.cover)
 
     # 本地预览模式
     if args.preview:
@@ -157,6 +149,7 @@ def main():
         preview_file.write_text(html_content, encoding="utf-8")
         print(f"✅ 预览文件已成功生成！")
         print(f"   路径: {preview_file}")
+        print(f"   封面: {cover_image_path}")
         
         # 尝试使用系统默认浏览器打开
         try:
@@ -170,7 +163,7 @@ def main():
         print("\n[DryRun] 工具可用性验证通过：")
         print(f"  - 扫描文章库：{len(posts)} 篇文章可用")
         print(f"  - 已选文章：《{selected_post['title']}》")
-        print(f"  - 封面图：{cover_image_path.name if cover_image_path else '[无]'}")
+        print(f"  - 封面图：{cover_image_path}")
         print("  - 注意：未向微信服务器发起任何网络请求")
         sys.exit(0)
 
