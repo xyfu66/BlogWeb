@@ -218,52 +218,11 @@ function Write-LfTempFile {
     return $tempFile
 }
 
-function Sync-NginxSitesEnv {
-    param(
-        [hashtable]$Config,
-        [switch]$DryRun
-    )
-    $localPath = Join-Path $script:DeployRoot 'nginx/sites.env'
-    if (-not (Test-Path $localPath)) {
-        Write-Host 'Skip Sync-NginxSitesEnv: deploy/nginx/sites.env not found locally'
-        return
-    }
-    $remoteDir = ($Config['REMOTE_REPO_ROOT'].TrimEnd('/')) + '/deploy/nginx'
-    $target = Get-SshTarget -Config $Config
-    $content = Convert-DotEnvContentToLf -Content (Get-Content $localPath -Raw -Encoding UTF8)
-    $tempFile = Write-LfTempFile -Content $content
-    try {
-        if ($DryRun) {
-            Write-Host ('[DryRun] scp deploy/nginx/sites.env -> {0}:{1}/sites.env' -f $target, $remoteDir)
-            Write-Host ('[DryRun] ssh chmod 600 {0}/sites.env' -f $remoteDir)
-            return
-        }
-        Invoke-DeploySsh -Config $Config -RemoteCommand ('mkdir -p ''{0}''' -f $remoteDir)
-        $dest = ('{0}:{1}/sites.env' -f $target, $remoteDir)
-        Invoke-DeployScp -Config $Config -ScpArgs @($tempFile, $dest)
-        Invoke-DeploySsh -Config $Config -RemoteCommand ('chmod 600 ''{0}/sites.env''' -f $remoteDir)
-        Write-Host 'Synced deploy/nginx/sites.env to remote'
-    }
-    finally {
-        if ($tempFile -and (Test-Path $tempFile)) {
-            Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-        }
-    }
-}
-
 function Test-DomainNotPlaceholder {
     param([hashtable]$Config)
     if ($Config['SSH_HOST'] -match 'example\.com' -or $Config['SSH_HOST'] -match 'your-server' -or $Config['SSH_HOST'] -match 'your\.server') {
         Write-Error ('deploy/.env SSH_HOST contains placeholder ({0}) — deployment blocked.' -f $Config['SSH_HOST'])
         exit $script:ExitPreflight
-    }
-    $sitesEnv = Join-Path $script:DeployRoot 'nginx/sites.env'
-    if (Test-Path $sitesEnv) {
-        $content = Get-Content $sitesEnv -Raw -Encoding UTF8
-        if ($content -match 'example\.com') {
-            Write-Error 'deploy/nginx/sites.env contains example.com — configure real domain.'
-            exit $script:ExitPreflight
-        }
     }
 }
 

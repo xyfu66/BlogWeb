@@ -1,4 +1,4 @@
-# Preflight: Check local tools, deploy config, SSH reachability probe, and sync sites.env.
+# Preflight: Check local tools, deploy config, and SSH reachability probe.
 param(
     [switch]$DryRun
 )
@@ -25,7 +25,6 @@ if (-not $DryRun) {
 # 4. SSH reachability probe (BatchMode=yes)
 if ($DryRun) {
     Write-Host '[DryRun] SSH connectivity test skipped' -ForegroundColor Yellow
-    Sync-NginxSitesEnv -Config $cfg -DryRun
     Write-Host 'Preflight OK (DryRun)' -ForegroundColor Green
     exit 0
 }
@@ -58,8 +57,5 @@ if ($LASTEXITCODE -ne 0) {
     exit $script:ExitPreflight
 }
 Write-Host ('[OK] Remote target directory is writable: {0}' -f $cfg['REMOTE_BLOG_DIR']) -ForegroundColor Green
-
-# 7. Synchronize Nginx sites.env & template
-Sync-NginxSitesEnv -Config $cfg
 
 Write-Host 'Preflight OK' -ForegroundColor Green
